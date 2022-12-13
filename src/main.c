@@ -1,7 +1,6 @@
 #include <neural_controller.h>
 
-int main(void)
-{
+int main(void) {
   // create neurons
 
   double netinput[LAYERS + 1][NEURONS] = {0.0};
@@ -25,35 +24,24 @@ int main(void)
 
   /*Initialize bias and weights*/
   srand(time(NULL));
-  for (int i = 0; i < LAYERS; i++)
-  {
-    for (int j = 0; j < NEURONS; j++)
-    {
-      if (i == 0)
-      {
-        for (int k = 0; k < INPUTS; k++)
-        {
+  for (int i = 0; i < LAYERS; i++) {
+    for (int j = 0; j < NEURONS; j++) {
+      if (i == 0) {
+        for (int k = 0; k < INPUTS; k++) {
           weights[i][j][k] = (double)rand() / RAND_MAX;
         }
-      }
-      else if (i > 0 && i < LAYERS - 1)
-      {
-        for (int k = 0; k < NEURONS; k++)
-        {
+      } else if (i > 0 && i < LAYERS - 1) {
+        for (int k = 0; k < NEURONS; k++) {
           weights[i][j][k] = (double)rand() / RAND_MAX;
         }
-      }
-      else if (i == LAYERS)
+      } else if (i == LAYERS)
         bias[i][j] = (double)rand() / RAND_MAX;
     }
   }
 
-  for (int i = 0; i < LAYERS + 1; i++)
-  {
-    for (int j = 0; j < NEURONS; j++)
-    {
-      for (int k = 0; k < NEURONS; k++)
-      {
+  for (int i = 0; i < LAYERS + 1; i++) {
+    for (int j = 0; j < NEURONS; j++) {
+      for (int k = 0; k < NEURONS; k++) {
         weights[i][j][k] = (double)rand() / RAND_MAX;
       }
     }
@@ -69,72 +57,55 @@ int main(void)
 
   /*Feed Forward*/
   int epoch = 0;
-  while (epoch < MAX_EPOCHS)
-  {
+  while (epoch < MAX_EPOCHS) {
     epoch += 1;
-    for (int i = 0; i < LAYERS + 1; i++)
-    {
-      for (int j = 0; j < NEURONS; j++)
-      {
-        if (i == 0)
-        {
+    for (int i = 0; i < LAYERS + 1; i++) {
+      for (int j = 0; j < NEURONS; j++) {
+        if (i == 0) {
           double sum = 0.0;
-          for (int k = 0; k < INPUTS; k++)
-          {
+          for (int k = 0; k < INPUTS; k++) {
             sum += input[k] * weights[i][j][k];
           }
           netinput[i][j] = sum;
           netoutput[i][j] = tanh(netinput[i][j]);
           continue;
-        }
-        else if ((i > 0) && (i < LAYERS))
-        {
+        } else if ((i > 0) && (i < LAYERS)) {
           double sum = 0.0;
-          for (int k = 0; k < NEURONS; k++)
-          {
+          for (int k = 0; k < NEURONS; k++) {
             sum += netinput[i - 1][j] * weights[i - 1][j][k];
           }
           netinput[i][j] = sum;
           netoutput[i][j] = tanh(netinput[i][j]);
-        }
-        else
-        {
+        } else {
           double sum = 0.0;
-          for (int k = 0; k < NEURONS; k++)
-          {
+          for (int k = 0; k < NEURONS; k++) {
             sum += netinput[i - 1][j] * weights[i][j][k];
           }
           netinput[i][j] = sum;
-          output[0] = tanh(sum);
+          // tanh zwischen -1 und +1
+          output[0] = sum;
         }
       }
     }
 
-    for (int i = LAYERS + 1; i >= 0; i--)
-    {
+    // Backpropagation
+    for (int i = LAYERS + 1; i >= 0; i--) {
       double sigma = 0.0;
-      if (i == LAYERS + 1)
-      {
+      if (i == LAYERS + 1) {
         int j = 0;
-        while (j < OUTPUT_LAYER_NEURONS)
-        {
+        while (j < OUTPUT_LAYER_NEURONS) {
           sigma = (tanh_deriv(netinput[i][j])) * (output[j] - target);
           layer_sigma[i][j] = sigma;
-          for (int k = 0; k < NEURONS; k++)
-          {
+          for (int k = 0; k < NEURONS; k++) {
             weights[i][j][k] += (-LEARNING_RATE * sigma * output[j]);
           }
           j++;
         }
-      }
-      else if (i == LAYERS)
-      {
+      } else if (i == LAYERS) {
         int j = 0;
-        while (j < NEURONS)
-        {
+        while (j < NEURONS) {
           double sum = 0.0;
-          for (int k = 0; k < NEURONS; k++)
-          {
+          for (int k = 0; k < NEURONS; k++) {
             sum += layer_sigma[i + 1][j] * weights[i][j][k];
             sigma = (tanh_deriv(netinput[i][j])) * sum;
             layer_sigma[i][j] = sigma;
@@ -142,15 +113,11 @@ int main(void)
           }
           j++;
         }
-      }
-      else if ((i < LAYERS) && (i > 0))
-      {
+      } else if ((i < LAYERS) && (i > 0)) {
         int j = 0;
-        while (j < NEURONS)
-        {
+        while (j < NEURONS) {
           double sum = 0.0;
-          for (int k = 0; k < NEURONS; k++)
-          {
+          for (int k = 0; k < NEURONS; k++) {
             sum += layer_sigma[i + 1][j] * weights[i][j][k];
             sigma = (tanh_deriv(netinput[i][j])) * sum;
             layer_sigma[i][j] = sigma;
@@ -158,15 +125,11 @@ int main(void)
           }
           j++;
         }
-      }
-      else if (i == 0)
-      {
+      } else if (i == 0) {
         int j = 0;
-        while (j < INPUTS)
-        {
+        while (j < INPUTS) {
           double sum = 0.0;
-          for (int k = 0; k < NEURONS; k++)
-          {
+          for (int k = 0; k < NEURONS; k++) {
             sum += layer_sigma[i + 1][j] * weights[i][j][k];
             sigma = (tanh_deriv(netinput[i][j])) * sum;
             layer_sigma[i][j] = sigma;
