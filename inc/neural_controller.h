@@ -1,24 +1,36 @@
+/**
+ * @file neural_controller.h
+ * @author Jakob Schatzl (you@domain.com)
+ * @brief
+ * @version 0.1
+ * @date 2023-01-13
+ *
+ * @copyright Copyright (c) 2023
+ *
+ */
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
-#define LAYERS 3
-#define NEURONS 10
-#define OUTPUT_LAYER_NEURONS 1
-#define INPUTS 3
-#define MAX_EPOCHS 1000
-#define LEARNING_RATE 0.1
+#define INPUTS_BT_NEURONS 0
 
-struct neurons {
-  double *netinput;
-  double *netoutput;
-  double *bias;
+struct neuron {
+    double netinput;
+    double netoutput;
+    double bias;
+    double sigma;
 };
 
-struct neurons *create_neurons(int layers, int neurons);
-double *create_weights(int layers, int neurons, int output_layer_neurons,
-                       int inputs);
-int feed_forward(double netinput, double netoutput, double *input,
-                 double *weights, double *bias);
+struct neuralControllerConfig {
+    int layers;
+    int neurons;
+    int output_layer_neurons;
+    int inputs;
+    int max_epochs;
+    double learning_rate;
+};
+
 double tanh_deriv(double x);
+int learn_loop(struct neuralControllerConfig *ncConfig, double *ncOutput);
