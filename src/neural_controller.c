@@ -25,7 +25,7 @@ int learn_loop(struct neuralControllerConfig *ncConfig, double *ncOutput) {
 #if INPUTS_BT_NEURONS != 0
     struct neuron neuron[ncConfig->layers + 1][ncConfig->inputs];
     double weights[ncConfig->layers + 1][ncConfig->neurons][ncConfig->neurons];
-    memset(weights, 0, (ncConfig->layers + 1) * (ncConfig->neurons) * (ncConfig->neurons) * siezof(int));
+    memset(weights, 0, (ncConfig->layers + 1) * (ncConfig->neurons) * (ncConfig->neurons) * sizeof(int));
 #else
     struct neuron neuron[ncConfig->layers + 1][ncConfig->neurons];
     double weights[ncConfig->layers + 1][ncConfig->inputs][ncConfig->neurons];
