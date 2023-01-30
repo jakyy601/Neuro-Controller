@@ -16,7 +16,7 @@ int main(void) {
     ncConfig.inputs = 3;
     ncConfig.layers = 3;
     ncConfig.learning_rate = 0.1;
-    ncConfig.max_epochs = 1000;
+    ncConfig.max_epochs = 100000;
     ncConfig.neurons = 4;
     ncConfig.output_layer_neurons = 1;
 
