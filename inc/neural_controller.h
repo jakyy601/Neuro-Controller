@@ -32,5 +32,11 @@ struct neuralControllerConfig {
     double learning_rate;
 };
 
+struct i2_path_s {
+    double yn_1;
+    double yn_12;
+};
+
 double tanh_deriv(double x);
 int learn_loop(struct neuralControllerConfig *ncConfig, double *ncOutput);
+struct i2_path_s i2_path(double K, double T, double yn, double yn2, double uk);
