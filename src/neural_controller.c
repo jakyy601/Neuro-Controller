@@ -81,6 +81,7 @@ int learn_loop(struct neuralControllerConfig *ncConfig, double *ncOutput) {
                 if (i == 0) {
                     double sum = 0.0;
                     for (int k = 0; k < ncConfig->inputs; k++) {
+                        // k = vorheriger Layer = Inputneuronen
                         sum += input[k] * weights[i][j][k];
                     }
                     neuron[i][j].netinput = sum;
@@ -89,6 +90,7 @@ int learn_loop(struct neuralControllerConfig *ncConfig, double *ncOutput) {
                 } else {
                     double sum = 0.0;
                     for (int k = 0; k < ncConfig->neurons; k++) {
+                        // k = alle Vorgängerneuronen, also von k(vorher) -> j(jetziges)
                         sum += neuron[i - 1][k].netoutput * weights[i][j][k];
                     }
                     neuron[i][j].netinput = sum;
@@ -100,6 +102,7 @@ int learn_loop(struct neuralControllerConfig *ncConfig, double *ncOutput) {
         for (int j = 0; j < ncConfig->output_layer_neurons; j++) {
             double sum = 0.0;
             for (int k = 0; k < ncConfig->neurons; k++) {
+                // TODO: Warum [k][j] und nicht [j][k]
                 sum += neuron[ncConfig->layers - 1][k].netoutput * weights[ncConfig->layers][k][j];
             }
             neuron[ncConfig->layers][j].netinput = sum;
