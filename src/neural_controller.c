@@ -33,9 +33,7 @@ int learn_loop(struct neuralControllerConfig *ncConfig, double *ncOutput) {
 #endif
 
     double input[ncConfig->inputs];
-    double layer_sigma[ncConfig->layers + 1][ncConfig->neurons];
     // TODO: Evtl. dasselbe wie bei den weights
-    double output[ncConfig->output_layer_neurons];
     double target = 0.7;
 
     input[0] = 0.3;
@@ -85,7 +83,7 @@ int learn_loop(struct neuralControllerConfig *ncConfig, double *ncOutput) {
                         sum += input[k] * weights[i][j][k];
                     }
                     neuron[i][j].netinput = sum;
-                    neuron[i][j].netoutput = tanh(neuron[i][j].netinput);
+                    neuron[i][j].netoutput = tanh(sum);
                     /*Hidden layers between input and output layer*/
                 } else {
                     double sum = 0.0;
@@ -94,7 +92,7 @@ int learn_loop(struct neuralControllerConfig *ncConfig, double *ncOutput) {
                         sum += neuron[i - 1][k].netoutput * weights[i][j][k];
                     }
                     neuron[i][j].netinput = sum;
-                    neuron[i][j].netoutput = tanh(neuron[i][j].netinput);
+                    neuron[i][j].netoutput = tanh(sum);
                 }
             }
         }
@@ -122,8 +120,7 @@ int learn_loop(struct neuralControllerConfig *ncConfig, double *ncOutput) {
                     sigma = (tanh_deriv(neuron[i - 1][j].netinput) * (neuron[ncConfig->layers][j].netoutput - target));
                     neuron[i - 1][j].sigma = sigma;
                     for (int k = 0; k < ncConfig->neurons; k++) {
-                        weights[i - 1][j][k] +=
-                            (-ncConfig->learning_rate * sigma * neuron[i - 2][k].netoutput);
+                        weights[i - 1][j][k] += (-ncConfig->learning_rate * sigma * neuron[i - 2][k].netoutput);
                     }
                     j++;
                 }
@@ -133,13 +130,12 @@ int learn_loop(struct neuralControllerConfig *ncConfig, double *ncOutput) {
                 while (j < ncConfig->neurons) {
                     double sum = 0.0;
                     for (int k = 0; k < ncConfig->output_layer_neurons; k++) {
-                        sum += layer_sigma[i][k] * weights[i][j][k];
+                        sum += neuron[i][k].sigma * weights[i][j][k];
                     }
                     sigma = (tanh_deriv(neuron[i - 1][j].netinput) * sum);
                     neuron[i - 1][j].sigma = sigma;
                     for (int k = 0; k < ncConfig->neurons; k++) {
-                        weights[i - 1][j][k] +=
-                            (-ncConfig->learning_rate * sigma * neuron[i - 2][k].netoutput);
+                        weights[i - 1][j][k] += (-ncConfig->learning_rate * sigma * neuron[i - 2][k].netoutput);
                     }
                     j++;
                 }
@@ -149,13 +145,12 @@ int learn_loop(struct neuralControllerConfig *ncConfig, double *ncOutput) {
                 while (j < ncConfig->neurons) {
                     double sum = 0.0;
                     for (int k = 0; k < ncConfig->neurons; k++) {
-                        sum += layer_sigma[i][j] * weights[i][j][k];
+                        sum += neuron[i][k].sigma * weights[i][j][k];
                     }
                     sigma = (tanh_deriv(neuron[i - 1][j].netinput) * sum);
                     neuron[i - 1][j].sigma = sigma;
                     for (int k = 0; k < ncConfig->neurons; k++) {
-                        weights[i - 1][j][k] +=
-                            (-ncConfig->learning_rate * sigma * neuron[i - 2][k].netoutput);
+                        weights[i - 1][j][k] += (-ncConfig->learning_rate * sigma * neuron[i - 2][k].netoutput);
                     }
                     j++;
                 }
