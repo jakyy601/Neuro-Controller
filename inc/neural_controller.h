@@ -34,3 +34,4 @@ struct neuralControllerConfig {
 
 double tanh_deriv(double x);
 int learn_loop(struct neuralControllerConfig *ncConfig, double *ncOutput);
+void shuffle(int *array, size_t n);

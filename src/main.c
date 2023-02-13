@@ -13,11 +13,11 @@
 int main(void) {
     struct neuralControllerConfig ncConfig;
 
-    ncConfig.inputs = 3;
-    ncConfig.layers = 3;
+    ncConfig.inputs = 2;
+    ncConfig.layers = 2;
     ncConfig.learning_rate = 0.1;
-    ncConfig.max_epochs = 100000;
-    ncConfig.neurons = 4;
+    ncConfig.max_epochs = 10000;
+    ncConfig.neurons = 2;
     ncConfig.output_layer_neurons = 1;
 
     double output[1] = {0.0};
