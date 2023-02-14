@@ -14,6 +14,10 @@
 #include <string.h>
 #include <time.h>
 
+#include "cJSON.h"
+#include "pbPlots.h"
+#include "supportLib.h"
+
 #define INPUTS_BT_NEURONS 0
 
 struct neuron {
@@ -33,5 +37,5 @@ struct neuralControllerConfig {
 };
 
 double tanh_deriv(double x);
-int learn_loop(struct neuralControllerConfig *ncConfig, double *ncOutput);
+int learn_loop(struct neuralControllerConfig *ncConfig, double *ncOutput, double *pError_array);
 void shuffle(int *array, size_t n);

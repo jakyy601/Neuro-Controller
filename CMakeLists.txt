@@ -12,6 +12,26 @@ file(GLOB all_SRCS
         "${PROJECT_SOURCE_DIR}/src/*.c"
 )
 
+add_library(
+    pbPlots
+    "${PROJECT_SOURCE_DIR}/lib/pbPlots/pbPlots.c"
+    "${PROJECT_SOURCE_DIR}/lib/pbPlots/pbPlots.h"
+    "${PROJECT_SOURCE_DIR}/lib/pbPlots/supportLib.c"
+    "${PROJECT_SOURCE_DIR}/lib/pbPlots/supportLib.c"
+)
+
+add_library(
+    cJSON
+    "${PROJECT_SOURCE_DIR}/lib/cJSON/cJSON.c"
+    "${PROJECT_SOURCE_DIR}/lib/cJSON/cJSON.h"
+)
+
+target_include_directories(
+    pbPlots PUBLIC 
+    "${PROJECT_SOURCE_DIR}/lib/pbPlots"
+    cJSON
+    "${PROJECT_SOURCE_DIR}/lib/cJSON")
+
 add_executable(main ${all_SRCS})
-#link_directories(${CMAKE_SOURCE_DIR}/inc)
-#add_executable(main src/main.c)
+
+target_link_libraries(main PRIVATE pbPlots cJSON)

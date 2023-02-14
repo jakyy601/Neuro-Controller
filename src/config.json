@@ -1,0 +1,8 @@
+{
+    "inputs": 2,
+    "layers": 2,
+    "learning_rate": 0.1,
+    "max_epochs": 10000,
+    "neurons": 2,
+    "output_layer_neurons": 1
+}

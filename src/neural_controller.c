@@ -20,7 +20,7 @@
  * @param ncOutput Output array
  * @return -
  */
-int learn_loop(struct neuralControllerConfig *ncConfig, double *ncOutput) {
+int learn_loop(struct neuralControllerConfig *ncConfig, double *ncOutput, double *pError_array) {
     // create neurons
 #if INPUTS_BT_NEURONS == 0
     struct neuron neuron[ncConfig->layers + 1][ncConfig->neurons];
@@ -35,6 +35,9 @@ int learn_loop(struct neuralControllerConfig *ncConfig, double *ncOutput) {
     // training data
     double training_inputs[4][2] = {{0.0f, 0.0f}, {1.0f, 0.0f}, {0.0f, 1.0f}, {1.0f, 1.0f}};
     double training_outputs[4][1] = {{0.0f}, {1.0f}, {1.0f}, {0.0f}};
+    double error = 0.0;
+    double error_array[ncConfig->max_epochs];
+    int error_cnt = 0;
 
     // double input[ncConfig->inputs];
 
@@ -76,7 +79,6 @@ int learn_loop(struct neuralControllerConfig *ncConfig, double *ncOutput) {
         shuffle(trainingSetOrder, 4);
         for (int layer = 0; layer < 4; layer++) {
             trainingCnt = trainingSetOrder[layer];
-
             for (int layer = 0; layer < ncConfig->layers; layer++) {
                 for (int j = 0; j < ncConfig->neurons; j++) {
                     /*Input layer*/
@@ -104,7 +106,7 @@ int learn_loop(struct neuralControllerConfig *ncConfig, double *ncOutput) {
             for (int j = 0; j < ncConfig->output_layer_neurons; j++) {
                 double sum = 0.0;
                 for (int k = 0; k < ncConfig->neurons; k++) {
-                    // TODO: Warum [k][j] und nicht [j][k]
+                    // FIXME: fix initialization then [j][k] can be used
                     sum += neuron[ncConfig->layers - 1][k].netoutput * weights[ncConfig->layers][k][j];
                 }
                 neuron[ncConfig->layers][j].netinput = sum;
@@ -112,24 +114,42 @@ int learn_loop(struct neuralControllerConfig *ncConfig, double *ncOutput) {
                 // Linear output, no RELU, sigmoid or hyperbolic tangent
             }
 
+            // Calculate error
+            for (int i = 0; i < ncConfig->output_layer_neurons; i++) {
+                error += fabs(training_outputs[trainingCnt][0] - neuron[ncConfig->layers][i].netoutput);
+            }
+            if (error_cnt == 3) {
+                error_array[epoch - 1] = error;
+                error_cnt = 0;
+                error = 0;
+            } else {
+                error_cnt++;
+            }
             /*Backpropagation*/
             /*For detailed explaination see https://de.wikipedia.org/wiki/Backpropagation#Neuronenausgabe*/
+            /**
+             * layer = k
+             * layer - 1 = j
+             * layer - 2 = i
+             */
             /*Start at output layer*/
             for (int layer = ncConfig->layers + 1; layer > 0; layer--) {
                 double sigma = 0.0;
                 /*Output layer*/
                 if (layer == ncConfig->layers + 1) {
                     int j = 0;
-                    while (j < ncConfig->neurons) {
+                    while (j < ncConfig->output_layer_neurons) {
                         sigma = (tanh_deriv(neuron[layer - 1][j].netinput) * (neuron[ncConfig->layers][j].netoutput - training_outputs[trainingCnt][0]));
                         neuron[layer - 1][j].sigma = sigma;
-                        for (int k = 0; k < ncConfig->output_layer_neurons; k++) {
-                            weights[layer - 1][j][k] += (-ncConfig->learning_rate * sigma * neuron[layer - 2][k].netoutput);
+                        for (int k = 0; k < ncConfig->neurons; k++) {
+                            //[k][j] instead of [j][k] because of case of only 1 output
+                            // FIXME: fix initialization then [j][k] can be used
+                            weights[layer - 1][k][j] += (-ncConfig->learning_rate * sigma * neuron[layer - 2][k].netoutput);
                         }
                         j++;
                     }
                     /*Hidden Layers*/
-                } else if ((layer >= 1) && (layer < ncConfig->layers + 1)) {
+                } else if ((layer >= 1) && (layer < ncConfig->layers + 1) && (ncConfig->layers != 1)) {
                     int j = 0;
                     while (j < ncConfig->neurons) {
                         double sum = 0.0;
@@ -169,6 +189,9 @@ int learn_loop(struct neuralControllerConfig *ncConfig, double *ncOutput) {
                 printf(" %f ", training_inputs[trainingCnt][i]);
             printf("Target: %f Output: %f\n", training_outputs[trainingCnt][0], neuron[ncConfig->layers][0].netoutput);
         }
+    }
+    for (int i = 0; i < ncConfig->max_epochs; i++) {
+        *(pError_array + i) = error_array[i];
     }
     return 0;
 }

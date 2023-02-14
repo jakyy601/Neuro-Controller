@@ -13,6 +13,9 @@
 int main(void) {
     struct neuralControllerConfig ncConfig;
 
+    FILE* pConfig = fopen("config.json", "r");
+    // cJSON* config_json = cJSON_Parse;
+
     ncConfig.inputs = 2;
     ncConfig.layers = 2;
     ncConfig.learning_rate = 0.1;
@@ -20,11 +23,28 @@ int main(void) {
     ncConfig.neurons = 2;
     ncConfig.output_layer_neurons = 1;
 
+    fclose(pConfig);
+
     double output[1] = {0.0};
+    double* error = malloc(ncConfig.max_epochs * sizeof(double));
+    double x[ncConfig.max_epochs];
+    double y[ncConfig.max_epochs];
+    learn_loop(&ncConfig, output, error);
 
-    int ret = learn_loop(&ncConfig, output);
+    for (int i = 0; i < ncConfig.max_epochs; i++) {
+        x[i] = (float)i;
+        y[i] = *(error + i);
+    }
 
-    // printf("Target: %f\nOutput: %f\n", target, output[0]);
+    RGBABitmapImageReference* imageRef = CreateRGBABitmapImageReference();
+
+    DrawScatterPlot(imageRef, 600, 400, x, ncConfig.max_epochs, y, ncConfig.max_epochs, NULL);
+
+    size_t length;
+    double* pngData = ConvertToPNG(&length, imageRef->image);
+    WriteToFile(pngData, length, "plot.png");
+    DeleteImage(imageRef->image);
+    FreeAllocations();
 
     return 42;
 }
