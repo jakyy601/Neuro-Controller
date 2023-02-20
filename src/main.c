@@ -17,7 +17,7 @@ int main(void) {
     // cJSON* config_json = cJSON_Parse;
 
     ncConfig.inputs = 2;
-    ncConfig.layers = 2;
+    ncConfig.layers = 1;
     ncConfig.learning_rate = 0.1;
     ncConfig.max_epochs = 10000;
     ncConfig.neurons = 2;

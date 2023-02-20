@@ -49,17 +49,17 @@ int learn_loop(struct neuralControllerConfig *ncConfig, double *ncOutput, double
             /*Initialize weights between inputs and first layer*/
             if (layer == 0) {
                 for (int k = 0; k < ncConfig->inputs; k++) {
-                    weights[layer][j][k] = (double)rand() / RAND_MAX;
+                    weights[layer][j][k] = (double)rand() / (double)RAND_MAX;
                 }
                 /*Initialize weights in hidden layers between first and second to last*/
             } else if (layer > 0 && layer < ncConfig->layers) {
                 for (int k = 0; k < ncConfig->neurons; k++) {
-                    weights[layer][j][k] = (double)rand() / RAND_MAX;
+                    weights[layer][j][k] = (double)rand() / (double)RAND_MAX;
                 }
                 /*Initialize weights between last hidden layer and output layer*/
             } else if (layer == ncConfig->layers) {
                 for (int k = 0; k < ncConfig->output_layer_neurons; k++) {
-                    weights[layer][j][k] = (double)rand() / RAND_MAX;
+                    weights[layer][j][k] = (double)rand() / (double)RAND_MAX;
                 }
             }
             /*Initialize bias and everything else in the neuron struct*/
@@ -70,47 +70,49 @@ int learn_loop(struct neuralControllerConfig *ncConfig, double *ncOutput, double
         }
     }
 
-    /*Feed Forward*/
     int epoch = 0;
+    int trainingSetOrder[] = {0, 1, 2, 3};
+    int trainingCnt = 0;
     while (epoch < ncConfig->max_epochs) {
         epoch += 1;
-        int trainingCnt = 0;
-        int trainingSetOrder[] = {0, 1, 2, 3};
         shuffle(trainingSetOrder, 4);
-        for (int layer = 0; layer < 4; layer++) {
-            trainingCnt = trainingSetOrder[layer];
+
+        for (int trainingSetCnt = 0; trainingSetCnt < 4; trainingSetCnt++) {
+            trainingCnt = trainingSetOrder[trainingSetCnt];
+
+            /*Forward pass*/
             for (int layer = 0; layer < ncConfig->layers; layer++) {
                 for (int j = 0; j < ncConfig->neurons; j++) {
-                    /*Input layer*/
+                    /*First hidden layer*/
                     if (layer == 0) {
-                        double sum = 0.0;
+                        double sum = neuron[layer][j].bias;
                         for (int k = 0; k < ncConfig->inputs; k++) {
                             // k = vorheriger Layer = Inputneuronen
-                            sum += training_inputs[trainingCnt][k] * weights[layer][j][k];
+                            sum += training_inputs[trainingCnt][k] * weights[layer][k][j];
                         }
                         neuron[layer][j].netinput = sum;
-                        neuron[layer][j].netoutput = tanh(sum);
-                        /*Hidden layers between input and output layer*/
+                        neuron[layer][j].netoutput = sigmoid(sum);
+                        /*Hidden layers between first hidden and output layer*/
                     } else {
-                        double sum = 0.0;
+                        double sum = neuron[layer][j].bias;
                         for (int k = 0; k < ncConfig->neurons; k++) {
                             // k = alle Vorgängerneuronen, also von k(vorher) -> j(jetziges)
-                            sum += neuron[layer - 1][k].netoutput * weights[layer][j][k];
+                            sum += neuron[layer - 1][k].netoutput * weights[layer][k][j];
                         }
                         neuron[layer][j].netinput = sum;
-                        neuron[layer][j].netoutput = tanh(sum);
+                        neuron[layer][j].netoutput = sigmoid(sum);
                     }
                 }
             }
             /*Output layer*/
             for (int j = 0; j < ncConfig->output_layer_neurons; j++) {
-                double sum = 0.0;
+                double sum = neuron[ncConfig->layers][j].bias;
                 for (int k = 0; k < ncConfig->neurons; k++) {
                     // FIXME: fix initialization then [j][k] can be used
                     sum += neuron[ncConfig->layers - 1][k].netoutput * weights[ncConfig->layers][k][j];
                 }
                 neuron[ncConfig->layers][j].netinput = sum;
-                neuron[ncConfig->layers][j].netoutput = sum;
+                neuron[ncConfig->layers][j].netoutput = sigmoid(sum);
                 // Linear output, no RELU, sigmoid or hyperbolic tangent
             }
 
@@ -128,55 +130,52 @@ int learn_loop(struct neuralControllerConfig *ncConfig, double *ncOutput, double
             /*Backpropagation*/
             /*For detailed explaination see https://de.wikipedia.org/wiki/Backpropagation#Neuronenausgabe*/
             /**
-             * layer = k
-             * layer - 1 = j
-             * layer - 2 = i
+             * next layer     = k = layer + 1
+             * current layer  = j = layer
+             * previous layer = i = layer - 1
              */
             /*Start at output layer*/
-            for (int layer = ncConfig->layers + 1; layer > 0; layer--) {
-                double sigma = 0.0;
+            for (int layer = ncConfig->layers; layer >= 0; layer--) {
                 /*Output layer*/
-                if (layer == ncConfig->layers + 1) {
-                    int j = 0;
-                    while (j < ncConfig->output_layer_neurons) {
-                        sigma = (tanh_deriv(neuron[layer - 1][j].netinput) * (neuron[ncConfig->layers][j].netoutput - training_outputs[trainingCnt][0]));
-                        neuron[layer - 1][j].sigma = sigma;
+                if (layer == ncConfig->layers) {
+                    for (int j = 0; j < ncConfig->output_layer_neurons; j++) {
+                        double outputError = training_outputs[trainingCnt][0] - neuron[ncConfig->layers][j].netoutput;
+                        double sigma = outputError * dSigmoid(neuron[layer][j].netoutput);
                         for (int k = 0; k < ncConfig->neurons; k++) {
                             //[k][j] instead of [j][k] because of case of only 1 output
                             // FIXME: fix initialization then [j][k] can be used
-                            weights[layer - 1][k][j] += (-ncConfig->learning_rate * sigma * neuron[layer - 2][k].netoutput);
+                            weights[layer][k][j] += ncConfig->learning_rate * sigma * neuron[layer - 1][k].netoutput;
                         }
-                        j++;
+                        neuron[layer][j].bias += ncConfig->learning_rate * sigma;
+                        neuron[layer][j].sigma = sigma;
                     }
                     /*Hidden Layers*/
-                } else if ((layer >= 1) && (layer < ncConfig->layers + 1) && (ncConfig->layers != 1)) {
-                    int j = 0;
-                    while (j < ncConfig->neurons) {
+                } else if ((layer >= 1) && (layer < ncConfig->layers) && (ncConfig->layers != 1)) {
+                    for (int j = 0; j < ncConfig->neurons; j++) {
                         double sum = 0.0;
                         for (int k = 0; k < ncConfig->neurons; k++) {
-                            sum += neuron[layer][k].sigma * weights[layer][j][k];
+                            sum += neuron[layer + 1][k].sigma * weights[layer + 1][j][k];
                         }
-                        sigma = (tanh_deriv(neuron[layer - 1][j].netinput) * sum);
-                        neuron[layer - 1][j].sigma = sigma;
+                        double sigma = sum * dSigmoid(neuron[layer][j].netoutput);
                         for (int k = 0; k < ncConfig->neurons; k++) {
-                            weights[layer - 1][j][k] += (-ncConfig->learning_rate * sigma * neuron[layer - 2][k].netoutput);
+                            weights[layer][k][j] += ncConfig->learning_rate * sigma * neuron[layer - 1][k].netoutput;
                         }
-                        j++;
+                        neuron[layer][j].bias += ncConfig->learning_rate * sigma;
+                        neuron[layer][j].sigma = sigma;
                     }
-                    /*Input layer*/
+                    /*First Hidden Layer*/
                 } else {
-                    int j = 0;
-                    while (j < ncConfig->neurons) {
+                    for (int j = 0; j < ncConfig->inputs; j++) {
                         double sum = 0.0;
                         for (int k = 0; k < ncConfig->neurons; k++) {
-                            sum += neuron[layer][k].sigma * weights[layer][j][k];
+                            sum += neuron[layer + 1][k].sigma * weights[layer + 1][j][k];
                         }
-                        sigma = (tanh_deriv(neuron[layer - 1][j].netinput) * sum);
-                        neuron[layer - 1][j].sigma = sigma;
+                        double sigma = sum * dSigmoid(neuron[layer][j].netoutput);
                         for (int k = 0; k < ncConfig->inputs; k++) {
-                            weights[layer - 1][j][k] += (-ncConfig->learning_rate * sigma * neuron[layer - 2][k].netoutput);
+                            weights[layer][k][j] += ncConfig->learning_rate * sigma * training_inputs[trainingCnt][k];
                         }
-                        j++;
+                        neuron[layer][j].bias += ncConfig->learning_rate * sigma;
+                        neuron[layer][j].sigma = sigma;
                     }
                 }
             }
@@ -188,6 +187,20 @@ int learn_loop(struct neuralControllerConfig *ncConfig, double *ncOutput, double
             for (int i = 0; i < 2; i++)
                 printf(" %f ", training_inputs[trainingCnt][i]);
             printf("Target: %f Output: %f\n", training_outputs[trainingCnt][0], neuron[ncConfig->layers][0].netoutput);
+        }
+    }
+    printf("Bias: \n");
+    for (int layer = 0; layer <= ncConfig->layers; layer++) {
+        for (int j = 0; j < ncConfig->neurons; j++) {
+            printf("Layer:%d Neuron:%d Value:%f\n", layer, j, neuron[layer][j].bias);
+        }
+    }
+    printf("Weights \n");
+    for (int layer = 0; layer <= ncConfig->layers; layer++) {
+        for (int j = 0; j < ncConfig->neurons; j++) {
+            for (int k = 0; k < ncConfig->neurons; k++) {
+                printf("Layer:%d Neuron:%d Weights:%d Value:%f\n", layer, j, k, weights[layer][j][k]);
+            }
         }
     }
     for (int i = 0; i < ncConfig->max_epochs; i++) {
@@ -202,7 +215,10 @@ int learn_loop(struct neuralControllerConfig *ncConfig, double *ncOutput, double
  * @param x x value for the dervative of the hyberbolic tangent
  * @return y value for the dervative of the hyberbolic tangent
  */
-double tanh_deriv(double x) { return (pow(1 - tanh(x), 2)); }
+double tanh_deriv(double x) {
+    double th = tanh(x);
+    return 1.0 - th * th;
+}
 
 /* Arrange the N elements of ARRAY in random order.
    Only effective if N is much smaller than RAND_MAX;
@@ -219,3 +235,6 @@ void shuffle(int *array, size_t n) {
         }
     }
 }
+
+double sigmoid(double x) { return 1 / (1 + exp(-x)); }
+double dSigmoid(double x) { return x * (1 - x); }

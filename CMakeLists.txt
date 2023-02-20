@@ -7,9 +7,14 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/src
 )
 
-file(GLOB all_SRCS
-        "${PROJECT_SOURCE_DIR}/inc/*.h"
-        "${PROJECT_SOURCE_DIR}/src/*.c"
+file(GLOB main_srcs
+    "${PROJECT_SOURCE_DIR}/inc/neural_controller.h"
+    "${PROJECT_SOURCE_DIR}/src/main.c"
+    "${PROJECT_SOURCE_DIR}/src/neural_controller.c"
+)
+
+file(GLOB test_srcs
+    "${PROJECT_SOURCE_DIR}/src/test.c"
 )
 
 add_library(
@@ -32,6 +37,8 @@ target_include_directories(
     cJSON
     "${PROJECT_SOURCE_DIR}/lib/cJSON")
 
-add_executable(main ${all_SRCS})
+add_executable(main ${main_srcs})
+add_executable(test ${test_srcs})
 
 target_link_libraries(main PRIVATE pbPlots cJSON)
+target_link_libraries(test PRIVATE pbPlots)
