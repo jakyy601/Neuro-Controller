@@ -181,7 +181,7 @@ int learn_loop(struct neuralControllerConfig *ncConfig, double *ncOutput) {
                     neuron[i - 1][j].sigma = sigma;
                     for (int k = 0; k < ncConfig->neurons; k++) {
                         weights[i - 1][j][k] +=
-                            (-ncConfig->learning_rate * sigma * neuron[i - 2][k].netoutput);
+                            (-ncConfig->learning_rate * sigma * input[k]);
                     }
                     j++;
                 }
