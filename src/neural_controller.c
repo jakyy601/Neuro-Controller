@@ -189,12 +189,14 @@ int learn_loop(struct neuralControllerConfig *ncConfig, double *ncOutput, double
             printf("Target: %f Output: %f\n", training_outputs[trainingCnt][0], neuron[ncConfig->layers][0].netoutput);
         }
     }
+    // Print bias
     printf("Bias: \n");
     for (int layer = 0; layer <= ncConfig->layers; layer++) {
         for (int j = 0; j < ncConfig->neurons; j++) {
             printf("Layer:%d Neuron:%d Value:%f\n", layer, j, neuron[layer][j].bias);
         }
     }
+    // Print weights
     printf("Weights \n");
     for (int layer = 0; layer <= ncConfig->layers; layer++) {
         for (int j = 0; j < ncConfig->neurons; j++) {

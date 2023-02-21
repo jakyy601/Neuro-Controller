@@ -13,17 +13,12 @@
 int main(void) {
     struct neuralControllerConfig ncConfig;
 
-    FILE* pConfig = fopen("config.json", "r");
-    // cJSON* config_json = cJSON_Parse;
-
-    ncConfig.inputs = 2;
-    ncConfig.layers = 1;
-    ncConfig.learning_rate = 0.1;
-    ncConfig.max_epochs = 10000;
-    ncConfig.neurons = 2;
-    ncConfig.output_layer_neurons = 1;
-
-    fclose(pConfig);
+    ncConfig.inputs = ini_getl("Neural Network", "inputs", -1, inifile);
+    ncConfig.layers = ini_getl("Neural Network", "layers", -1, inifile);
+    ncConfig.learning_rate = round(ini_getf("Neural Network", "learning_rate", -1, inifile) * 100) / 100;
+    ncConfig.max_epochs = ini_getl("Neural Network", "max_epochs", -1, inifile);
+    ncConfig.neurons = ini_getl("Neural Network", "neurons", -1, inifile);
+    ncConfig.output_layer_neurons = ini_getl("Neural Network", "output_layer_neurons", -1, inifile);
 
     double output[1] = {0.0};
     double* error = malloc(ncConfig.max_epochs * sizeof(double));

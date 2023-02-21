@@ -31,14 +31,22 @@ add_library(
     "${PROJECT_SOURCE_DIR}/lib/cJSON/cJSON.h"
 )
 
+add_library(
+    minIni
+    "${PROJECT_SOURCE_DIR}/lib/minIni/minIni.c"
+    "${PROJECT_SOURCE_DIR}/lib/minIni/minIni.h"
+)
+
 target_include_directories(
     pbPlots PUBLIC 
     "${PROJECT_SOURCE_DIR}/lib/pbPlots"
     cJSON
-    "${PROJECT_SOURCE_DIR}/lib/cJSON")
+    "${PROJECT_SOURCE_DIR}/lib/cJSON"
+    minIni
+    "${PROJECT_SOURCE_DIR}/lib/minIni")
 
 add_executable(main ${main_srcs})
 add_executable(test ${test_srcs})
 
-target_link_libraries(main PRIVATE pbPlots cJSON)
+target_link_libraries(main PRIVATE pbPlots cJSON minIni)
 target_link_libraries(test PRIVATE pbPlots)

@@ -15,10 +15,13 @@
 #include <time.h>
 
 #include "cJSON.h"
+#include "minIni.h"
 #include "pbPlots.h"
 #include "supportLib.h"
 
 #define INPUTS_BT_NEURONS 0
+
+static const char inifile[] = "F:/work/Neuro-Controller/src/config.ini";
 
 struct neuron {
     double netinput;
