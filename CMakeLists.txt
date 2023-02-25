@@ -7,11 +7,46 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/src
 )
 
-file(GLOB all_SRCS
-        "${PROJECT_SOURCE_DIR}/inc/*.h"
-        "${PROJECT_SOURCE_DIR}/src/*.c"
+file(GLOB main_srcs
+    "${PROJECT_SOURCE_DIR}/inc/neural_controller.h"
+    "${PROJECT_SOURCE_DIR}/src/main.c"
+    "${PROJECT_SOURCE_DIR}/src/neural_controller.c"
 )
 
-add_executable(main ${all_SRCS})
-#link_directories(${CMAKE_SOURCE_DIR}/inc)
-#add_executable(main src/main.c)
+file(GLOB test_srcs
+    "${PROJECT_SOURCE_DIR}/src/test.c"
+)
+
+add_library(
+    pbPlots
+    "${PROJECT_SOURCE_DIR}/lib/pbPlots/pbPlots.c"
+    "${PROJECT_SOURCE_DIR}/lib/pbPlots/pbPlots.h"
+    "${PROJECT_SOURCE_DIR}/lib/pbPlots/supportLib.c"
+    "${PROJECT_SOURCE_DIR}/lib/pbPlots/supportLib.c"
+)
+
+add_library(
+    cJSON
+    "${PROJECT_SOURCE_DIR}/lib/cJSON/cJSON.c"
+    "${PROJECT_SOURCE_DIR}/lib/cJSON/cJSON.h"
+)
+
+add_library(
+    minIni
+    "${PROJECT_SOURCE_DIR}/lib/minIni/minIni.c"
+    "${PROJECT_SOURCE_DIR}/lib/minIni/minIni.h"
+)
+
+target_include_directories(
+    pbPlots PUBLIC 
+    "${PROJECT_SOURCE_DIR}/lib/pbPlots"
+    cJSON
+    "${PROJECT_SOURCE_DIR}/lib/cJSON"
+    minIni
+    "${PROJECT_SOURCE_DIR}/lib/minIni")
+
+add_executable(main ${main_srcs})
+add_executable(test ${test_srcs})
+
+target_link_libraries(main PRIVATE pbPlots cJSON minIni)
+target_link_libraries(test PRIVATE pbPlots)
