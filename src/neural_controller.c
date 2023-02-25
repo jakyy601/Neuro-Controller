@@ -108,7 +108,6 @@ int learn_loop(struct neuralControllerConfig *ncConfig, double *ncOutput, double
             for (int j = 0; j < ncConfig->output_layer_neurons; j++) {
                 double sum = neuron[ncConfig->layers][j].bias;
                 for (int k = 0; k < ncConfig->neurons; k++) {
-                    // FIXME: fix initialization then [j][k] can be used
                     sum += neuron[ncConfig->layers - 1][k].netoutput * weights[ncConfig->layers][k][j];
                 }
                 neuron[ncConfig->layers][j].netinput = sum;
@@ -142,8 +141,6 @@ int learn_loop(struct neuralControllerConfig *ncConfig, double *ncOutput, double
                         double outputError = training_outputs[trainingCnt][0] - neuron[ncConfig->layers][j].netoutput;
                         double sigma = outputError * dSigmoid(neuron[layer][j].netoutput);
                         for (int k = 0; k < ncConfig->neurons; k++) {
-                            //[k][j] instead of [j][k] because of case of only 1 output
-                            // FIXME: fix initialization then [j][k] can be used
                             weights[layer][k][j] += ncConfig->learning_rate * sigma * neuron[layer - 1][k].netoutput;
                         }
                         neuron[layer][j].bias += ncConfig->learning_rate * sigma;
