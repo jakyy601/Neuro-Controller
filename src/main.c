@@ -8,7 +8,7 @@
  * @copyright Copyright (c) 2023
  *
  */
-#include <neural_controller.h>
+#include "neuralController.h"
 
 int main(void) {
     struct neuralControllerConfig ncConfig;
@@ -37,7 +37,7 @@ int main(void) {
 
     size_t length;
     double* pngData = ConvertToPNG(&length, imageRef->image);
-    WriteToFile(pngData, length, "plot.png");
+    WriteToFile(pngData, length, "control.png");
     DeleteImage(imageRef->image);
     FreeAllocations();
 
