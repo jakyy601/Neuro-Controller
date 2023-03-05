@@ -8,7 +8,7 @@
  * @copyright Copyright (c) 2023
  *
  */
-#include <neural_controller.h>
+#include "neural_controller.h"
 
 /**
  * @brief Main loop for learning
@@ -33,10 +33,11 @@ int learn_loop(struct neuralControllerConfig *ncConfig, double *ncOutput, double
 #endif
 
     // training data
-    double training_inputs[4][2] = {{0.0f, 0.0f}, {1.0f, 0.0f}, {0.0f, 1.0f}, {1.0f, 1.0f}};
-    double training_outputs[4][1] = {{0.0f}, {1.0f}, {1.0f}, {0.0f}};
+    double training_inputs[8][3] = {{0.1f, 0.5f, 0.8f}, {0.2f, 0.3f, 0.7f}, {0.4f, 0.2f, 0.6f}, {0.5f, 0.6f, 0.9f}, {0.6f, 0.1f, 0.3f}, {0.8f, 0.4f, 0.1f}, {0.9f, 0.8f, 0.2f}, {0.3f, 0.7f, 0.5f}};
+    double training_outputs[8][1] = {{0.9f}, {0.8f}, {0.7f}, {0.95f}, {0.6f}, {0.5f}, {0.85f}, {0.75f}};
     double error = 0.0;
-    double error_array[ncConfig->max_epochs];
+    double *error_array = malloc(ncConfig->max_epochs * sizeof(double));
+    memset(error_array, 0, ncConfig->max_epochs * sizeof(double));
     int error_cnt = 0;
 
     // double input[ncConfig->inputs];
@@ -71,13 +72,13 @@ int learn_loop(struct neuralControllerConfig *ncConfig, double *ncOutput, double
     }
 
     int epoch = 0;
-    int trainingSetOrder[] = {0, 1, 2, 3};
+    int trainingSetOrder[] = {0, 1, 2, 3, 4, 5, 6, 7};
     int trainingCnt = 0;
     while (epoch < ncConfig->max_epochs) {
         epoch += 1;
-        shuffle(trainingSetOrder, 4);
+        shuffle(trainingSetOrder, ncConfig->inputs);
 
-        for (int trainingSetCnt = 0; trainingSetCnt < 4; trainingSetCnt++) {
+        for (int trainingSetCnt = 0; trainingSetCnt < ncConfig->inputs; trainingSetCnt++) {
             trainingCnt = trainingSetOrder[trainingSetCnt];
 
             /*Forward pass*/
@@ -120,7 +121,7 @@ int learn_loop(struct neuralControllerConfig *ncConfig, double *ncOutput, double
                 error += fabs(training_outputs[trainingCnt][0] - neuron[ncConfig->layers][i].netoutput);
             }
             if (error_cnt == 3) {
-                error_array[epoch - 1] = error;
+                *(error_array + epoch - 1) = error;
                 error_cnt = 0;
                 error = 0;
             } else {
@@ -139,7 +140,21 @@ int learn_loop(struct neuralControllerConfig *ncConfig, double *ncOutput, double
                 if (layer == ncConfig->layers) {
                     for (int j = 0; j < ncConfig->output_layer_neurons; j++) {
                         double outputError = training_outputs[trainingCnt][0] - neuron[ncConfig->layers][j].netoutput;
-                        double sigma = outputError * dSigmoid(neuron[layer][j].netoutput);
+                        double sigma = outputError * dSigmoid(neuron[layer][j].netinput);
+                        for (int k = 0; k < ncConfig->neurons; k++) {
+                            weights[layer][k][j] += ncConfig->learning_rate * sigma * neuron[layer - 1][k].netoutput;
+                        }
+                        neuron[layer][j].bias += ncConfig->learning_rate * sigma;
+                        neuron[layer][j].sigma = sigma;
+                    }
+                    /*Layer after output layer*/
+                } else if (layer == (ncConfig->layers - 1) && (ncConfig->layers != 1)) {
+                    for (int j = 0; j < ncConfig->neurons; j++) {
+                        double sum = 0.0;
+                        for (int k = 0; k < ncConfig->output_layer_neurons; k++) {
+                            sum += neuron[layer + 1][k].sigma * weights[layer + 1][j][k];
+                        }
+                        double sigma = sum * dSigmoid(neuron[layer][j].netinput);
                         for (int k = 0; k < ncConfig->neurons; k++) {
                             weights[layer][k][j] += ncConfig->learning_rate * sigma * neuron[layer - 1][k].netoutput;
                         }
@@ -153,7 +168,7 @@ int learn_loop(struct neuralControllerConfig *ncConfig, double *ncOutput, double
                         for (int k = 0; k < ncConfig->neurons; k++) {
                             sum += neuron[layer + 1][k].sigma * weights[layer + 1][j][k];
                         }
-                        double sigma = sum * dSigmoid(neuron[layer][j].netoutput);
+                        double sigma = sum * dSigmoid(neuron[layer][j].netinput);
                         for (int k = 0; k < ncConfig->neurons; k++) {
                             weights[layer][k][j] += ncConfig->learning_rate * sigma * neuron[layer - 1][k].netoutput;
                         }
@@ -167,7 +182,7 @@ int learn_loop(struct neuralControllerConfig *ncConfig, double *ncOutput, double
                         for (int k = 0; k < ncConfig->neurons; k++) {
                             sum += neuron[layer + 1][k].sigma * weights[layer + 1][j][k];
                         }
-                        double sigma = sum * dSigmoid(neuron[layer][j].netoutput);
+                        double sigma = sum * dSigmoid(neuron[layer][j].netinput);
                         for (int k = 0; k < ncConfig->inputs; k++) {
                             weights[layer][k][j] += ncConfig->learning_rate * sigma * training_inputs[trainingCnt][k];
                         }
@@ -181,9 +196,9 @@ int learn_loop(struct neuralControllerConfig *ncConfig, double *ncOutput, double
                 ncOutput[i] = neuron[ncConfig->layers][i].netoutput;
             }
             printf("Inputs: ");
-            for (int i = 0; i < 2; i++)
-                printf(" %f ", training_inputs[trainingCnt][i]);
-            printf("Target: %f Output: %f\n", training_outputs[trainingCnt][0], neuron[ncConfig->layers][0].netoutput);
+            for (int i = 0; i < ncConfig->inputs; i++)
+                printf(" %.2f ", training_inputs[trainingCnt][i]);
+            printf("Target: %.2f Output: %.2f\n", training_outputs[trainingCnt][0], neuron[ncConfig->layers][0].netoutput);
         }
     }
     // Print bias
@@ -203,8 +218,9 @@ int learn_loop(struct neuralControllerConfig *ncConfig, double *ncOutput, double
         }
     }
     for (int i = 0; i < ncConfig->max_epochs; i++) {
-        *(pError_array + i) = error_array[i];
+        *(pError_array + i) = *(error_array + i);
     }
+    free(error_array);
     return 0;
 }
 
@@ -236,4 +252,7 @@ void shuffle(int *array, size_t n) {
 }
 
 double sigmoid(double x) { return 1 / (1 + exp(-x)); }
-double dSigmoid(double x) { return x * (1 - x); }
+double dSigmoid(double x) {
+    double s = sigmoid(x);
+    return s * (1 - s);
+}

@@ -41,5 +41,7 @@ int main(void) {
     DeleteImage(imageRef->image);
     FreeAllocations();
 
+    free(error);
+
     return 42;
 }
