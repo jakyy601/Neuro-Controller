@@ -20,17 +20,26 @@
  * @param ncOutput Output array
  * @return -
  */
-int learn_loop(struct neuralControllerConfig *ncConfig, double *ncOutput, double *pError_array) {
+int learn_loop(struct neuralControllerConfig *ncConfig, double *ncOutput, double *pError_array, int *layer_sizes) {
     // create neurons
 #if INPUTS_BT_NEURONS == 0
     struct neuron neuron[ncConfig->layers + 1][ncConfig->neurons];
-    double weights[ncConfig->layers + 1][ncConfig->neurons][ncConfig->neurons];
-    memset(weights, 0, (ncConfig->layers + 1) * (ncConfig->neurons) * (ncConfig->neurons) * sizeof(double));
+    float ***weights = malloc((ncConfig->layers) * sizeof(float **));
+    for (int i = 0; i < ncConfig->layers; i++) {
+        weights[i] = malloc(layer_sizes[i] * sizeof(float *));
+        for (int j = 0; j < layer_sizes[i]; j++) {
+            weights[i][j] = malloc(ncConfig->layer_sizes[i + 1] * sizeof(float));
+        }
+    }
+    // double weights[ncConfig->layers + 1][ncConfig->neurons][ncConfig->neurons];
+    // memset(weights, 0, (ncConfig->layers + 1) * (ncConfig->neurons) * (ncConfig->neurons) * sizeof(double));
 #else
     struct neuron neuron[ncConfig->layers + 1][ncConfig->inputs];
     double weights[ncConfig->layers + 1][ncConfig->inputs][ncConfig->neurons];
     memset(weights, 0, (ncConfig->layers + 1) * (ncConfig->inputs) * (ncConfig->neurons) * sizeof(double));
 #endif
+
+    initialize_weights(weights, ncConfig->layer_sizes, ncConfig->layers);
 
     double input[ncConfig->inputs];
     memset(input, 0, ncConfig->inputs * sizeof(double));
@@ -164,18 +173,19 @@ int learn_loop(struct neuralControllerConfig *ncConfig, double *ncOutput, double
                 }
                 /*Last Hidden Layer*/
             } else if (layer == (ncConfig->layers - 1)) {
-                for (int j = 0; j < ncConfig->neurons; j++) {
-                    double sum = 0.0;
-                    for (int k = 0; k < ncConfig->output_layer_neurons; k++) {
-                        sum += neuron[layer + 1][k].sigma * weights[layer + 1][j][k];
-                    }
-                    double sigma = sum * tanh_deriv(neuron[layer][j].netoutput);
-                    for (int k = 0; k < ncConfig->neurons; k++) {
-                        weights[layer][k][j] += ncConfig->learning_rate * sigma * neuron[layer - 1][k].netoutput;
-                    }
-                    neuron[layer][j].bias += ncConfig->learning_rate * sigma;
-                    neuron[layer][j].sigma = sigma;
-                }
+                backpropagation(weights, neuron, layer, ncConfig->neurons, ncConfig->output_layer_neurons, ncConfig->learning_rate);
+                // for (int j = 0; j < ncConfig->neurons; j++) {
+                //     double sum = 0.0;
+                //     for (int k = 0; k < ncConfig->output_layer_neurons; k++) {
+                //         sum += neuron[layer + 1][k].sigma * weights[layer + 1][j][k];
+                //     }
+                //     double sigma = sum * tanh_deriv(neuron[layer][j].netoutput);
+                //     for (int k = 0; k < ncConfig->neurons; k++) {
+                //         weights[layer][k][j] += ncConfig->learning_rate * sigma * neuron[layer - 1][k].netoutput;
+                //     }
+                //     neuron[layer][j].bias += ncConfig->learning_rate * sigma;
+                //     neuron[layer][j].sigma = sigma;
+                // }
                 /*Hidden Layers*/
             } else if ((layer >= 1) && (layer < ncConfig->layers) && (ncConfig->layers != 1)) {
                 for (int j = 0; j < ncConfig->neurons; j++) {
@@ -236,4 +246,31 @@ int learn_loop(struct neuralControllerConfig *ncConfig, double *ncOutput, double
         *(pError_array + i) = error_array[i];
     }
     return 0;
+}
+
+void backpropagation(double ***weights, struct neuron **neuron, int layer, int neurons_current, int neurons_next, double learning_rate) {
+    for (int j = 0; j < neurons_current; j++) {
+        double sum = 0.0;
+        for (int k = 0; k < neurons_next; k++) {
+            sum += neuron[layer + 1][k].sigma * weights[layer + 1][j][k];
+        }
+        double sigma = sum * tanh_deriv(neuron[layer][j].netinput);
+        for (int k = 0; k < neurons_current; k++) {
+            weights[layer][k][j] += learning_rate * sigma * neuron[layer - 1][k].netoutput;
+        }
+        neuron[layer][j].sigma += learning_rate * sigma;
+    }
+}
+
+void initialize_weights(float ***weights, int *layer_sizes, int num_layers) {
+    srand(time(NULL));
+    for (int i = 0; i < num_layers - 1; i++) {
+        int current_layer_size = layer_sizes[i];
+        int next_layer_size = layer_sizes[i + 1];
+        for (int j = 0; j < next_layer_size; j++) {
+            for (int k = 0; k < current_layer_size; k++) {
+                weights[i][k][j] = ((float)rand() / (float)RAND_MAX) * 2.0 - 1.0;
+            }
+        }
+    }
 }

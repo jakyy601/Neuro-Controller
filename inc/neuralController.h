@@ -38,10 +38,13 @@ struct neuralControllerConfig {
     int inputs;
     int max_epochs;
     double learning_rate;
+    int layer_sizes[];
 };
 
 static const char inifile[] = "F:/work/Neuro-Controller/cfg/config.ini";
 
-int learn_loop(struct neuralControllerConfig *ncConfig, double *ncOutput, double *pError_array);
+int learn_loop(struct neuralControllerConfig *ncConfig, double *ncOutput, double *pError_array, int *layer_sizes);
+void initialize_weights(float ***weights, int *layer_sizes, int num_layers);
+void backpropagation(double ***weights, struct neuron **neuron, int layer, int neurons_current, int neurons_next, double learning_rate);
 
 #endif
