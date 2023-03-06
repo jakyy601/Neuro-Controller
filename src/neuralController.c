@@ -89,7 +89,7 @@ int learn_loop(struct neuralControllerConfig *ncConfig, double *ncOutput, double
         double error = soll - yn;
         input[0] = error;
         input[1] = yn;
-        // input[2] = yn2;
+        input[2] = yn2;
         epoch += 1;
 
         /*Forward pass*/
