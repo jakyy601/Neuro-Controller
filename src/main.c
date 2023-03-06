@@ -20,22 +20,11 @@ int main(void) {
     ncConfig.neurons = ini_getl("Neural Network", "neurons", -1, inifile);
     ncConfig.output_layer_neurons = ini_getl("Neural Network", "output_layer_neurons", -1, inifile);
 
-    int layer_sizes[ncConfig.layers + 1];
-
-    for (int i = 0; i < ncConfig.layers + 1; i++) {
-        if (i == 0)
-            layer_sizes[i] = ncConfig.inputs;
-        else if (i == ncConfig.layers)
-            layer_sizes[i] = ncConfig.output_layer_neurons;
-        else
-            layer_sizes[i] = ncConfig.neurons;
-    }
-
     double output[1] = {0.0};
     double* error = malloc(ncConfig.max_epochs * sizeof(double));
     double x[ncConfig.max_epochs];
     double y[ncConfig.max_epochs];
-    learn_loop(&ncConfig, output, error, layer_sizes);
+    learn_loop(&ncConfig, output, error);
 
     for (int i = 0; i < ncConfig.max_epochs; i++) {
         x[i] = (float)i;
