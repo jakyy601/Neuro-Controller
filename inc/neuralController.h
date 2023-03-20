@@ -11,6 +11,7 @@
 #ifndef neuralController
 #define neuralController
 
+#include <assert.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
