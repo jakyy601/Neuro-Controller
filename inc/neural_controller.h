@@ -8,6 +8,7 @@
  * @copyright Copyright (c) 2023
  *
  */
+#include <assert.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
