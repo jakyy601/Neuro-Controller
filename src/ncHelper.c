@@ -17,7 +17,7 @@
  * @param x x value for the dervative of the hyberbolic tangent
  * @return y value for the dervative of the hyberbolic tangent
  */
-double tanh_deriv(double x) {
+double dTanh(double x) {
     double th = tanh(x);
     return 1.0 - th * th;
 }
@@ -56,7 +56,10 @@ double sigmoid(double x) { return 1 / (1 + exp(-x)); }
  * @param x x value
  * @return y value
  */
-double dSigmoid(double x) { return x * (1 - x); }
+double dSigmoid(double x) {
+    double s = sigmoid(x);
+    return s * (1 - s);
+}
 
 /**
  * @brief Double I path
