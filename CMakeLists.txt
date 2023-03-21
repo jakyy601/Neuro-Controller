@@ -61,6 +61,6 @@ add_executable(main ${main_srcs})
 add_executable(test ${test_srcs})
 add_executable(test2 ${test2_srcs})
 
-target_link_libraries(main PRIVATE pbPlots cJSON minIni)
+target_link_libraries(main PRIVATE pbPlots cJSON minIni m)
 target_link_libraries(test PRIVATE pbPlots)
 target_link_libraries(test2 PRIVATE pbPlots)
