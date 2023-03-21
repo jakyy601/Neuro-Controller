@@ -44,7 +44,6 @@ struct neuralControllerConfig {
 
 static const char inifile[] = "F:/work/Neuro-Controller/cfg/config.ini";
 
-int learn_loop(struct neuralControllerConfig *ncConfig, double *pError_array, int *layer_sizes);
-void initialize_weights(float ***weights, int *layer_sizes, int num_layers);
+int learn_loop(struct neuralControllerConfig *ncConfig, double *pError_array);
 
 #endif
