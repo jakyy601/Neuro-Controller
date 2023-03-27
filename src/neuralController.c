@@ -20,7 +20,7 @@
  * @param ncOutput Output array
  * @return -
  */
-int learn_loop(struct neuralControllerConfig *ncConfig, double *pError_array) {
+int learn_loop(struct neuralControllerConfig* ncConfig, double* pError_array) {
     // create neurons
 #if INPUTS_BT_NEURONS == 0
     struct neuron neuron[ncConfig->layers - 1][ncConfig->neurons];
@@ -45,7 +45,7 @@ int learn_loop(struct neuralControllerConfig *ncConfig, double *pError_array) {
     double d2 = 0.0;
     double rating = 0.0;
 
-    double *error_array = calloc(ncConfig->max_epochs, sizeof(double));
+    // double *error_array = calloc(ncConfig->max_epochs, sizeof(double));
     int error_cnt = 0;
     int total_neurons = ncConfig->neurons * ncConfig->hidden_layers + ncConfig->output_layer_neurons;
     int total_weights = (ncConfig->inputs * ncConfig->neurons) + (ncConfig->neurons * ncConfig->neurons * (ncConfig->hidden_layers - 1)) + (ncConfig->neurons * ncConfig->output_layer_neurons);
@@ -104,7 +104,10 @@ int learn_loop(struct neuralControllerConfig *ncConfig, double *pError_array) {
                         sum += neuron[layer - 1][k].netoutput * weights[layer][k][j];
                 }
                 neuron[layer][j].netinput = sum;
-                neuron[layer][j].netoutput = tanh(sum);
+                if (layer == ncConfig->hidden_layers)
+                    neuron[layer][j].netoutput = tanh(sum);
+                else
+                    neuron[layer][j].netoutput = tanh(sum);
                 n++;
             }
         }
@@ -115,7 +118,7 @@ int learn_loop(struct neuralControllerConfig *ncConfig, double *pError_array) {
         i2 = i2_path(K, T, yn, yn2, neuron[ncConfig->hidden_layers][0].netoutput);
         d2 = i2.yn_12 - yn2;
         yn2 = i2.yn_12;
-        *(error_array + (epoch - 1)) = (double)yn;
+        *(pError_array + (epoch - 1)) = (double)yn;
         yn = i2.yn_1;
 
         act_new = soll - i2.yn_1 + d2;
@@ -190,8 +193,11 @@ int learn_loop(struct neuralControllerConfig *ncConfig, double *pError_array) {
             }
         }
     }
-    memcpy(pError_array, error_array, ncConfig->max_epochs * sizeof(double));
-    free(error_array);
+    // memcpy(pError_array, error_array, ncConfig->max_epochs * sizeof(double));
 
     return 0;
+}
+
+void backwards_pass(struct ncConfig* ncConfig, int* topology, struct neuron** neuron, double*** weights) {
+    return;
 }
