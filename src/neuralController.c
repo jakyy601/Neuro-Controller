@@ -197,7 +197,3 @@ int learn_loop(struct neuralControllerConfig* ncConfig, double* pError_array) {
 
     return 0;
 }
-
-void backwards_pass(struct ncConfig* ncConfig, int* topology, struct neuron** neuron, double*** weights) {
-    return;
-}
