@@ -52,4 +52,10 @@ Mkfile.old
 dkms.conf
 
 # Build Files
-build/**
+*build/**
+
+# Logs
+*log*
+
+# Chache
+*cache*
