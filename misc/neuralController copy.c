@@ -20,7 +20,7 @@
  * @param ncOutput Output array
  * @return -
  */
-int learn_loop(struct neuralControllerConfig* ncConfig, double* pError_array, input_st* pInput) {
+int learn_loop(struct neuralControllerConfig* ncConfig, double* pError_array) {
     // create neurons
 #if INPUTS_BIGGER_THAN_NEURONS == 0
     struct neuron neuron[ncConfig->layers - 1][ncConfig->neurons];
@@ -35,10 +35,15 @@ int learn_loop(struct neuralControllerConfig* ncConfig, double* pError_array, in
     double input[ncConfig->inputs];
     memset(input, 0, ncConfig->inputs * sizeof(double));
 
-    double act_old = 0;
-    double act_new = 0;
-    double rating = 0;
-    double yn = 0;
+    double K = 1.0;
+    double T = 0.1;
+    double yn = 0.0;
+    double yn2 = 0.0;
+    double soll = 0.5;
+    double act_old = soll - 0;
+    double act_new = 0.0;
+    double d2 = 0.0;
+    double rating = 0.0;
 
     // double *error_array = calloc(ncConfig->max_epochs, sizeof(double));
     int error_cnt = 0;
@@ -54,6 +59,10 @@ int learn_loop(struct neuralControllerConfig* ncConfig, double* pError_array, in
             topology[i] = ncConfig->neurons;
         }
     }
+
+    struct i2_path_s i2;
+    i2.yn_1 = 0.0;
+    i2.yn_12 = 0.0;
 
     // double input[ncConfig->inputs];
 
@@ -75,13 +84,13 @@ int learn_loop(struct neuralControllerConfig* ncConfig, double* pError_array, in
     }
 
     for (int epoch = 0; epoch < ncConfig->max_epochs; epoch++) {
+        double error = soll - yn;
         int n = 0;
         int w = 0;
-        while (pInput->available == false) {
-            ;
-        }
-        input[0] = ncConfig->setpoint - yn;
-        input[1] = pInput->value;
+        input[0] = error;
+        input[1] = yn;
+        input[2] = yn2;
+
         /*Forward pass*/
         for (int layer = 0; layer < ncConfig->layers - 1; layer++) {
             for (int j = 0; j < topology[layer + 1]; j++) {
@@ -104,9 +113,18 @@ int learn_loop(struct neuralControllerConfig* ncConfig, double* pError_array, in
         }
         assert(n == total_neurons);
         n = 0;
-        act_new = ncConfig->setpoint - neuron[ncConfig->hidden_layers][0].netoutput;
+
+        // Calculate I2 values
+        i2 = i2_path(K, T, yn, yn2, neuron[ncConfig->hidden_layers][0].netoutput);
+        d2 = i2.yn_12 - yn2;
+        yn2 = i2.yn_12;
+        *(pError_array + (epoch - 1)) = (double)yn;
+        yn = i2.yn_1;
+
+        act_new = soll - i2.yn_1 + d2;
         rating = (fabs(act_new) - fabs(act_old)) + act_new;
         act_old = act_new;
+
         /*Backpropagation*/
         /*For detailed explaination see https://de.wikipedia.org/wiki/Backpropagation#Neuronenausgabe*/
         /**
@@ -156,7 +174,7 @@ int learn_loop(struct neuralControllerConfig* ncConfig, double* pError_array, in
         printf("Inputs: ");
         for (int i = 0; i < ncConfig->inputs; i++)
             printf(" %f ", input[i]);
-        printf("Target: %f Output: %f\n", ncConfig->setpoint, neuron[ncConfig->hidden_layers][0].netoutput);
+        printf("Target: %f Output: %f\n", soll, neuron[ncConfig->hidden_layers][0].netoutput);
     }
 
     // Print bias

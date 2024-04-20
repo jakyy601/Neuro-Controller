@@ -8,10 +8,36 @@
  * @copyright Copyright (c) 2023
  *
  */
+#include "main.h"
+
 #include "neuralController.h"
 
-int main(void) {
+pthread_t feedInputThread;
+pthread_mutex_t mutex;
+input_st input = (input_st){0};
+
+void* feedInput(void* arg) {
+    FILE* fptr = fopen("pt1.txt", "r");
+    char input_buffer[50] = {0};
+    int ret = 0;
+    char* pEnd = NULL;
+    while (1) {
+        if (input.available == false) {
+            ret = fscanf(fptr, "%s", &input_buffer);
+            if (ret == EOF) {
+                break;
+            }
+            pthread_mutex_lock(&mutex);
+            input.value = (double)strtof(input_buffer, &pEnd);
+            input.available = true;
+            pthread_mutex_unlock(&mutex);
+        }
+    }
+}
+
+int main(int argc, const char* argv[]) {
     struct neuralControllerConfig ncConfig;
+    long job = 0;
 
     ncConfig.inputs = ini_getl("Neural Network", "inputs", -1, inifile);
     ncConfig.hidden_layers = ini_getl("Neural Network", "hidden_layers", -1, inifile);
@@ -20,11 +46,18 @@ int main(void) {
     ncConfig.max_epochs = ini_getl("Neural Network", "max_epochs", -1, inifile);
     ncConfig.neurons = ini_getl("Neural Network", "neurons", -1, inifile);
     ncConfig.output_layer_neurons = ini_getl("Neural Network", "output_layer_neurons", -1, inifile);
+    ncConfig.setpoint = round(ini_getf("Neural Network", "setpoint", -1, inifile) * 100) / 100;
 
     double* error_array = calloc(ncConfig.max_epochs, sizeof(double));
     double x[ncConfig.max_epochs];
     double y[ncConfig.max_epochs];
-    learn_loop(&ncConfig, error_array);
+    // input_st input[ncConfig.inputs];
+    input.available = false;
+
+    pthread_mutex_init(&mutex, NULL);
+    pthread_create(&feedInputThread, NULL, feedInput, (void*)(&job));
+
+    learn_loop(&ncConfig, error_array, &input);
 
     for (int i = 0; i < ncConfig.max_epochs; i++) {
         x[i] = (float)i;

@@ -13,17 +13,14 @@
 
 #include <assert.h>
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "cJSON.h"
-#include "minIni.h"
 #include "ncHelper.h"
-#include "pbPlots.h"
-#include "supportLib.h"
 
-#define INPUTS_BT_NEURONS 0
+#define INPUTS_BIGGER_THAN_NEURONS 0
 
 struct neuron {
     double netinput;
@@ -40,10 +37,16 @@ struct neuralControllerConfig {
     int inputs;
     int max_epochs;
     double learning_rate;
+    double setpoint;
 };
+
+typedef struct input {
+    double value;
+    _Bool available;
+} input_st;
 
 static const char inifile[] = "F:/work/Neuro-Controller/cfg/config.ini";
 
-int learn_loop(struct neuralControllerConfig* ncConfig, double* pError_array);
+int learn_loop(struct neuralControllerConfig* ncConfig, double* pError_array, input_st* pInput);
 
-#endif
+#endif  // neuralController

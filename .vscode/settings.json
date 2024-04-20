@@ -1,4 +1,11 @@
 {
-    "C_Cpp.errorSquiggles": "Disabled",
-    "cmake.configureOnOpen": true
+    "C_Cpp.errorSquiggles": "disabled",
+    "cmake.configureOnOpen": true,
+    "files.associations": {
+        "nchelper.h": "c",
+        "supportlib.h": "c",
+        "type_traits": "c",
+        "xtr1common": "c",
+        "neuralcontroller.h": "c"
+    }
 }
