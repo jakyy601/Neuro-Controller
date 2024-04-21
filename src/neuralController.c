@@ -60,10 +60,12 @@ int learn_loop(struct neuralControllerConfig* ncConfig, double* pError_array, in
     /*Initialize weights and bias with random values between 0 and 1 and
       initialize the rest with 0*/
     srand(time(NULL));
-    for (int layer = 0; layer < ncConfig->layers + 1; layer++) {
+    for (int layer = 0; layer < ncConfig->layers; layer++) {
         for (int j = 0; j < topology[layer]; j++) {
             /*Initialize weights between inputs and first layer*/
             for (int k = 0; k < topology[layer + 1]; k++) {
+                if (layer == ncConfig->layers - 1)
+                    break;
                 weights[layer][j][k] = (double)rand() / (double)RAND_MAX;
             }
             /*Initialize bias and everything else in the neuron struct*/
@@ -80,8 +82,9 @@ int learn_loop(struct neuralControllerConfig* ncConfig, double* pError_array, in
         while (pInput->available == false) {
             ;
         }
-        input[0] = ncConfig->setpoint - yn;
+        input[0] = ncConfig->setpoint - neuron[ncConfig->hidden_layers][0].netoutput;
         input[1] = pInput->value;
+        pInput->available = false;
         /*Forward pass*/
         for (int layer = 0; layer < ncConfig->layers - 1; layer++) {
             for (int j = 0; j < topology[layer + 1]; j++) {
@@ -160,21 +163,21 @@ int learn_loop(struct neuralControllerConfig* ncConfig, double* pError_array, in
     }
 
     // Print bias
-    printf("Bias: \n");
-    for (int layer = 0; layer <= ncConfig->hidden_layers; layer++) {
-        for (int j = 0; j < ncConfig->neurons; j++) {
-            printf("Layer:%d Neuron:%d Value:%f\n", layer, j, neuron[layer][j].bias);
-        }
-    }
-    // Print weights
-    printf("Weights \n");
-    for (int layer = 0; layer <= ncConfig->hidden_layers; layer++) {
-        for (int j = 0; j < ncConfig->neurons; j++) {
-            for (int k = 0; k < ncConfig->neurons; k++) {
-                printf("Layer:%d Neuron:%d Weights:%d Value:%f\n", layer, j, k, weights[layer][j][k]);
-            }
-        }
-    }
+    // printf("Bias: \n");
+    // for (int layer = 0; layer <= ncConfig->hidden_layers; layer++) {
+    //     for (int j = 0; j < ncConfig->neurons; j++) {
+    //         printf("Layer:%d Neuron:%d Value:%f\n", layer, j, neuron[layer][j].bias);
+    //     }
+    // }
+    // // Print weights
+    // printf("Weights \n");
+    // for (int layer = 0; layer <= ncConfig->hidden_layers; layer++) {
+    //     for (int j = 0; j < ncConfig->neurons; j++) {
+    //         for (int k = 0; k < ncConfig->neurons; k++) {
+    //             printf("Layer:%d Neuron:%d Weights:%d Value:%f\n", layer, j, k, weights[layer][j][k]);
+    //         }
+    //     }
+    // }
     // memcpy(pError_array, error_array, ncConfig->max_epochs * sizeof(double));
 
     return 0;

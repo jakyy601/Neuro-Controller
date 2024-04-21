@@ -14,7 +14,7 @@ while(True):
     y.append(ykp1)
     file.write(f"{repr(ykp1)}\n")
     k = k + 1
-    if k == 100:
+    if k == 1000:
         break
 
 file.close()
