@@ -18,9 +18,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "ncHelper.h"
-
 #define INPUTS_BIGGER_THAN_NEURONS 0
+
+#define INPUTS 2
+#define HIDDEN_LAYERS 3
+#define LEARNING_RATE 0.01
+#define INFINITE 0
+#define MAX_EPOCHS 500
+#define NEURONS 6
+#define OUTPUT_LAYER_NEURONS 1
 
 struct neuron {
     double netinput;
@@ -36,6 +42,7 @@ struct neuralControllerConfig {
     int output_layer_neurons;
     int inputs;
     int max_epochs;
+    int infinite;
     double learning_rate;
     double setpoint;
 };
@@ -45,8 +52,9 @@ typedef struct input {
     _Bool available;
 } input_st;
 
-static const char inifile[] = "F:/work/Neuro-Controller/cfg/config.ini";
-
-int learn_loop(struct neuralControllerConfig* ncConfig, double* pError_array, input_st* pInput);
+int learn_loop(struct neuralControllerConfig* ncConfig, double* pError, input_st* pInput, unsigned int seed);
+double dTanh(double x);
+double sigmoid(double x);
+double dSigmoid(double x);
 
 #endif  // neuralController

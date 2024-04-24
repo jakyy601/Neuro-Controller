@@ -20,7 +20,7 @@
  * @param ncOutput Output array
  * @return -
  */
-int learn_loop(struct neuralControllerConfig* ncConfig, double* pError_array, input_st* pInput) {
+int learn_loop(struct neuralControllerConfig* ncConfig, double* pError, input_st* pInput, unsigned int seed) {
     // create neurons
 #if INPUTS_BIGGER_THAN_NEURONS == 0
     struct neuron neuron[ncConfig->layers - 1][ncConfig->neurons];
@@ -38,10 +38,8 @@ int learn_loop(struct neuralControllerConfig* ncConfig, double* pError_array, in
     double act_old = 0;
     double act_new = 0;
     double rating = 0;
-    double yn = 0;
 
     // double *error_array = calloc(ncConfig->max_epochs, sizeof(double));
-    int error_cnt = 0;
     int total_neurons = ncConfig->neurons * ncConfig->hidden_layers + ncConfig->output_layer_neurons;
     int total_weights = (ncConfig->inputs * ncConfig->neurons) + (ncConfig->neurons * ncConfig->neurons * (ncConfig->hidden_layers - 1)) + (ncConfig->neurons * ncConfig->output_layer_neurons);
     int topology[ncConfig->layers];
@@ -59,7 +57,7 @@ int learn_loop(struct neuralControllerConfig* ncConfig, double* pError_array, in
 
     /*Initialize weights and bias with random values between 0 and 1 and
       initialize the rest with 0*/
-    srand(time(NULL));
+    srand(seed);
     for (int layer = 0; layer < ncConfig->layers; layer++) {
         for (int j = 0; j < topology[layer]; j++) {
             /*Initialize weights between inputs and first layer*/
@@ -181,4 +179,35 @@ int learn_loop(struct neuralControllerConfig* ncConfig, double* pError_array, in
     // memcpy(pError_array, error_array, ncConfig->max_epochs * sizeof(double));
 
     return 0;
+}
+
+/**
+ * @brief Sigmoid function
+ *
+ * @param x x value
+ * @return y value
+ */
+double sigmoid(double x) { return 1 / (1 + exp(-x)); }
+
+/**
+ * @brief Derivative of the sigmoid function
+ *
+ *
+ * @param x x value
+ * @return y value
+ */
+double dSigmoid(double x) {
+    double s = sigmoid(x);
+    return s * (1 - s);
+}
+
+/**
+ * @brief C function for the hyberbolic tangent
+ *
+ * @param x x value for the dervative of the hyberbolic tangent
+ * @return y value for the dervative of the hyberbolic tangent
+ */
+double dTanh(double x) {
+    double th = tanh(x);
+    return 1.0 - th * th;
 }

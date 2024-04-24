@@ -8,4 +8,6 @@
 
 void* feedInput(void* arg);
 
+static const char inifile[] = "F:/work/Neuro-Controller/cfg/config.ini";
+
 #endif  // main_h

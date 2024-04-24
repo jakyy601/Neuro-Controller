@@ -44,6 +44,7 @@ int main(int argc, const char* argv[]) {
     ncConfig.layers = ncConfig.hidden_layers + 2;
     ncConfig.learning_rate = round(ini_getf("Neural Network", "learning_rate", -1, inifile) * 100) / 100;
     ncConfig.max_epochs = ini_getl("Neural Network", "max_epochs", -1, inifile);
+    ncConfig.infinite = ini_getl("Neural Network", "infinite", -1, inifile);
     ncConfig.neurons = ini_getl("Neural Network", "neurons", -1, inifile);
     ncConfig.output_layer_neurons = ini_getl("Neural Network", "output_layer_neurons", -1, inifile);
     ncConfig.setpoint = round(ini_getf("Neural Network", "setpoint", -1, inifile) * 100) / 100;
@@ -57,24 +58,24 @@ int main(int argc, const char* argv[]) {
     pthread_mutex_init(&mutex, NULL);
     pthread_create(&feedInputThread, NULL, feedInput, (void*)(&job));
 
-    learn_loop(&ncConfig, error_array, &input);
+    learn_loop(&ncConfig, error_array, &input, time(NULL));
 
-    for (int i = 0; i < ncConfig.max_epochs; i++) {
-        x[i] = (float)i;
-        y[i] = *(error_array + i);
-    }
+    // for (int i = 0; i < ncConfig.max_epochs; i++) {
+    //     x[i] = (float)i;
+    //     y[i] = *(error_array + i);
+    // }
 
-    RGBABitmapImageReference* imageRef = CreateRGBABitmapImageReference();
+    // RGBABitmapImageReference* imageRef = CreateRGBABitmapImageReference();
 
-    DrawScatterPlot(imageRef, 600, 400, x, ncConfig.max_epochs, y, ncConfig.max_epochs, NULL);
+    // DrawScatterPlot(imageRef, 600, 400, x, ncConfig.max_epochs, y, ncConfig.max_epochs, NULL);
 
-    size_t length;
-    double* pngData = ConvertToPNG(&length, imageRef->image);
-    WriteToFile(pngData, length, "control.png");
-    DeleteImage(imageRef->image);
-    FreeAllocations();
+    // size_t length;
+    // double* pngData = ConvertToPNG(&length, imageRef->image);
+    // WriteToFile(pngData, length, "control.png");
+    // DeleteImage(imageRef->image);
+    // FreeAllocations();
 
-    free(error_array);
+    // free(error_array);
 
-    return 42;
+    // return 42;
 }

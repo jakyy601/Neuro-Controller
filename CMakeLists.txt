@@ -11,8 +11,6 @@ file(
     GLOB main_srcs
     "${PROJECT_SOURCE_DIR}/src/neuralController.c"
     "${PROJECT_SOURCE_DIR}/inc/neuralController.h"
-    "${PROJECT_SOURCE_DIR}/src/ncHelper.h"
-    "${PROJECT_SOURCE_DIR}/src/ncHelper.c"
     "${PROJECT_SOURCE_DIR}/src/main.c"
 )
 
