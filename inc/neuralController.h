@@ -22,7 +22,7 @@
 
 #define INPUTS 2
 #define HIDDEN_LAYERS 3
-#define LEARNING_RATE 0.01
+#define LAYERS HIDDEN_LAYERS + 2
 #define INFINITE 0
 #define MAX_EPOCHS 500
 #define NEURONS 6
@@ -43,6 +43,8 @@ struct neuralControllerConfig {
     int inputs;
     int max_epochs;
     int infinite;
+    int one_shot;
+    int initialized;
     double learning_rate;
     double setpoint;
 };

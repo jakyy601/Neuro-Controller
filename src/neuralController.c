@@ -20,58 +20,58 @@
  * @param ncOutput Output array
  * @return -
  */
+
+static struct neuron neuron[LAYERS - 1][NEURONS];
+static double weights[LAYERS - 1][NEURONS][NEURONS];
+
+static double act_old = 0;
+static double act_new = 0;
+static double rating = 0;
+static int total_neurons = 0;
+static int total_weights = 0;
+static int topology[LAYERS];
+double input[INPUTS];
+
 int learn_loop(struct neuralControllerConfig* ncConfig, double* pError, input_st* pInput, unsigned int seed) {
     // create neurons
-#if INPUTS_BIGGER_THAN_NEURONS == 0
-    struct neuron neuron[ncConfig->layers - 1][ncConfig->neurons];
-    double weights[ncConfig->layers - 1][ncConfig->neurons][ncConfig->neurons];
-    memset(weights, 0, (ncConfig->layers - 1) * (ncConfig->neurons) * (ncConfig->neurons) * sizeof(double));
-#else
-    struct neuron neuron[ncConfig->layers - 1][ncConfig->inputs];
-    double weights[ncConfig->layers - 1][ncConfig->inputs][ncConfig->neurons];
-    memset(weights, 0, (ncConfig->layers - 1) * (ncConfig->inputs) * (ncConfig->neurons) * sizeof(double));
-#endif
+    if (ncConfig->initialized == 0) {
+        memset(input, 0, ncConfig->inputs * sizeof(double));
+        memset(weights, 0, (ncConfig->layers - 1) * (ncConfig->neurons) * (ncConfig->neurons) * sizeof(double));
 
-    double input[ncConfig->inputs];
-    memset(input, 0, ncConfig->inputs * sizeof(double));
-
-    double act_old = 0;
-    double act_new = 0;
-    double rating = 0;
-
-    // double *error_array = calloc(ncConfig->max_epochs, sizeof(double));
-    int total_neurons = ncConfig->neurons * ncConfig->hidden_layers + ncConfig->output_layer_neurons;
-    int total_weights = (ncConfig->inputs * ncConfig->neurons) + (ncConfig->neurons * ncConfig->neurons * (ncConfig->hidden_layers - 1)) + (ncConfig->neurons * ncConfig->output_layer_neurons);
-    int topology[ncConfig->layers];
-    for (int i = 0; i < ncConfig->layers; i++) {
-        if (i == ncConfig->layers - 1) {
-            topology[i] = ncConfig->output_layer_neurons;
-        } else if (i == 0) {
-            topology[i] = ncConfig->inputs;
-        } else {
-            topology[i] = ncConfig->neurons;
-        }
-    }
-
-    // double input[ncConfig->inputs];
-
-    /*Initialize weights and bias with random values between 0 and 1 and
-      initialize the rest with 0*/
-    srand(seed);
-    for (int layer = 0; layer < ncConfig->layers; layer++) {
-        for (int j = 0; j < topology[layer]; j++) {
-            /*Initialize weights between inputs and first layer*/
-            for (int k = 0; k < topology[layer + 1]; k++) {
-                if (layer == ncConfig->layers - 1)
-                    break;
-                weights[layer][j][k] = (double)rand() / (double)RAND_MAX;
+        // double *error_array = calloc(ncConfig->max_epochs, sizeof(double));
+        total_neurons = ncConfig->neurons * ncConfig->hidden_layers + ncConfig->output_layer_neurons;
+        total_weights = (ncConfig->inputs * ncConfig->neurons) + (ncConfig->neurons * ncConfig->neurons * (ncConfig->hidden_layers - 1)) + (ncConfig->neurons * ncConfig->output_layer_neurons);
+        for (int i = 0; i < ncConfig->layers; i++) {
+            if (i == ncConfig->layers - 1) {
+                topology[i] = ncConfig->output_layer_neurons;
+            } else if (i == 0) {
+                topology[i] = ncConfig->inputs;
+            } else {
+                topology[i] = ncConfig->neurons;
             }
-            /*Initialize bias and everything else in the neuron struct*/
-            neuron[layer][j].bias = (double)rand() / RAND_MAX;
-            neuron[layer][j].netinput = 0.0;
-            neuron[layer][j].netoutput = 0.0;
-            neuron[layer][j].sigma = 0.0;
         }
+
+        // double input[ncConfig->inputs];
+
+        /*Initialize weights and bias with random values between 0 and 1 and
+          initialize the rest with 0*/
+        srand(seed);
+        for (int layer = 0; layer < ncConfig->layers; layer++) {
+            for (int j = 0; j < topology[layer]; j++) {
+                /*Initialize weights between inputs and first layer*/
+                for (int k = 0; k < topology[layer + 1]; k++) {
+                    if (layer == ncConfig->layers - 1)
+                        break;
+                    weights[layer][j][k] = (double)rand() / (double)RAND_MAX;
+                }
+                /*Initialize bias and everything else in the neuron struct*/
+                neuron[layer][j].bias = (double)rand() / RAND_MAX;
+                neuron[layer][j].netinput = 0.0;
+                neuron[layer][j].netoutput = 0.0;
+                neuron[layer][j].sigma = 0.0;
+            }
+        }
+        ncConfig->initialized = 1;
     }
 
     for (int epoch = 0; epoch < ncConfig->max_epochs; epoch++) {
