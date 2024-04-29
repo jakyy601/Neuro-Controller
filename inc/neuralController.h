@@ -28,14 +28,14 @@
 #define NEURONS 6
 #define OUTPUT_LAYER_NEURONS 1
 
-struct neuron {
+typedef struct neuron {
     double netinput;
     double netoutput;
     double bias;
     double sigma;
-};
+} neuron_st;
 
-struct neuralControllerConfig {
+typedef struct neuralControllerConfig {
     int hidden_layers;
     int layers;
     int neurons;
@@ -47,14 +47,15 @@ struct neuralControllerConfig {
     int initialized;
     double learning_rate;
     double setpoint;
-};
+} neuralControllerConfig_st;
 
 typedef struct input {
     double value;
     _Bool available;
 } input_st;
 
-int learn_loop(struct neuralControllerConfig* ncConfig, double* pError, input_st* pInput, unsigned int seed);
+int neuralController_Init(neuralControllerConfig_st* ncConfig, unsigned int seed);
+int neuralController_Run(neuralControllerConfig_st* ncConfig, double* pOutput, input_st* pInput);
 double dTanh(double x);
 double sigmoid(double x);
 double dSigmoid(double x);

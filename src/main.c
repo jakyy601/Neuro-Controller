@@ -36,7 +36,7 @@ void* feedInput(void* arg) {
 }
 
 int main(int argc, const char* argv[]) {
-    struct neuralControllerConfig ncConfig;
+    neuralControllerConfig_st ncConfig;
     long job = 0;
 
     ncConfig.inputs = ini_getl("Neural Network", "inputs", -1, inifile);
@@ -61,12 +61,15 @@ int main(int argc, const char* argv[]) {
     double y[ncConfig.max_epochs];
     // input_st input[ncConfig.inputs];
     input_s.available = false;
+    double output = 0.0;
 
     pthread_mutex_init(&mutex, NULL);
     pthread_create(&feedInputThread, NULL, feedInput, (void*)(&job));
+    neuralController_Init(&ncConfig, time(NULL));
 
     for (int i = 0; i < 500; i++) {
-        learn_loop(&ncConfig, error_array, &input_s, time(NULL));
+        neuralController_Run(&ncConfig, &output, &input_s);
+        printf("Epoch: %d Target: %f Output: %f\n", i, ncConfig.setpoint, output);
     }
 
     // for (int i = 0; i < ncConfig.max_epochs; i++) {
