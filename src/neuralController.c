@@ -32,7 +32,7 @@ static int total_weights = 0;
 static int topology[LAYERS];
 double input[INPUTS];
 
-int neuralController_Init(neuralControllerConfig_st* ncConfig, unsigned int seed) {
+int neuralController_Init(neuralControllerConfig_st* ncConfig, int (*fctPtr)()) {
     memset(input, 0, ncConfig->inputs * sizeof(double));
     memset(weights, 0, (ncConfig->layers - 1) * (ncConfig->neurons) * (ncConfig->neurons) * sizeof(double));
 
@@ -53,17 +53,16 @@ int neuralController_Init(neuralControllerConfig_st* ncConfig, unsigned int seed
 
     /*Initialize weights and bias with random values between 0 and 1 and
       initialize the rest with 0*/
-    srand(seed);
     for (int layer = 0; layer < ncConfig->layers; layer++) {
         for (int j = 0; j < topology[layer]; j++) {
             /*Initialize weights between inputs and first layer*/
             for (int k = 0; k < topology[layer + 1]; k++) {
                 if (layer == ncConfig->layers - 1)
                     break;
-                weights[layer][j][k] = (double)rand() / (double)RAND_MAX;
+                weights[layer][j][k] = (double)(*fctPtr)() / (double)RAND_MAX;
             }
             /*Initialize bias and everything else in the neuron struct*/
-            neuron[layer][j].bias = (double)rand() / RAND_MAX;
+            neuron[layer][j].bias = (double)(*fctPtr)() / RAND_MAX;
             neuron[layer][j].netinput = 0.0;
             neuron[layer][j].netoutput = 0.0;
             neuron[layer][j].sigma = 0.0;

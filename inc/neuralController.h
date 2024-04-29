@@ -54,7 +54,7 @@ typedef struct input {
     _Bool available;
 } input_st;
 
-int neuralController_Init(neuralControllerConfig_st* ncConfig, unsigned int seed);
+int neuralController_Init(neuralControllerConfig_st* ncConfig, int (*fctPtr)());
 int neuralController_Run(neuralControllerConfig_st* ncConfig, double* pOutput, input_st* pInput);
 double dTanh(double x);
 double sigmoid(double x);

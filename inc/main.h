@@ -7,6 +7,7 @@
 #include "supportLib.h"
 
 void* feedInput(void* arg);
+int generateRandomInt(void);
 
 static const char inifile[] = "F:/work/Neuro-Controller/cfg/config.ini";
 

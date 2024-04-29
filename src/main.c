@@ -16,25 +16,6 @@ pthread_t feedInputThread;
 pthread_mutex_t mutex;
 input_st input_s = (input_st){0};
 
-void* feedInput(void* arg) {
-    FILE* fptr = fopen("pt1.txt", "r");
-    char input_buffer[50] = {0};
-    int ret = 0;
-    char* pEnd = NULL;
-    while (1) {
-        if (input_s.available == false) {
-            ret = fscanf(fptr, "%s", &input_buffer);
-            if (ret == EOF) {
-                break;
-            }
-            pthread_mutex_lock(&mutex);
-            input_s.value = (double)strtof(input_buffer, &pEnd);
-            input_s.available = true;
-            pthread_mutex_unlock(&mutex);
-        }
-    }
-}
-
 int main(int argc, const char* argv[]) {
     neuralControllerConfig_st ncConfig;
     long job = 0;
@@ -62,10 +43,14 @@ int main(int argc, const char* argv[]) {
     // input_st input[ncConfig.inputs];
     input_s.available = false;
     double output = 0.0;
+    srand(time(NULL));
+
+    int (*randFctPtr)();
+    randFctPtr = &generateRandomInt;
 
     pthread_mutex_init(&mutex, NULL);
     pthread_create(&feedInputThread, NULL, feedInput, (void*)(&job));
-    neuralController_Init(&ncConfig, time(NULL));
+    neuralController_Init(&ncConfig, randFctPtr);
 
     for (int i = 0; i < 500; i++) {
         neuralController_Run(&ncConfig, &output, &input_s);
@@ -90,4 +75,27 @@ int main(int argc, const char* argv[]) {
     // free(error_array);
 
     // return 42;
+}
+
+int generateRandomInt(void) {
+    return rand();
+}
+
+void* feedInput(void* arg) {
+    FILE* fptr = fopen("pt1.txt", "r");
+    char input_buffer[50] = {0};
+    int ret = 0;
+    char* pEnd = NULL;
+    while (1) {
+        if (input_s.available == false) {
+            ret = fscanf(fptr, "%s", &input_buffer);
+            if (ret == EOF) {
+                break;
+            }
+            pthread_mutex_lock(&mutex);
+            input_s.value = (double)strtof(input_buffer, &pEnd);
+            input_s.available = true;
+            pthread_mutex_unlock(&mutex);
+        }
+    }
 }
