@@ -19,10 +19,9 @@ while(True):
     buff = list(float_str.encode('utf-8'))
     for idx, byte in enumerate(buff):
         tx_buff[idx] = buff[idx]
-    input()
     ser.write(tx_buff)
     print(f"Sent {tx_buff} over UART")
     time.sleep(0.02)
-    rx = ser.read(20)
-    print(f"Got message {rx}")
-    rx = 0
+    #rx = ser.read(20)
+    #print(f"Got message {rx}")
+    #rx = 0

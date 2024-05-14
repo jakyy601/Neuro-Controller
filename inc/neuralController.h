@@ -20,12 +20,12 @@
 
 #define INPUTS_BIGGER_THAN_NEURONS 0
 
-#define INPUTS 2
+#define INPUTS 3
 #define HIDDEN_LAYERS 3
 #define LAYERS HIDDEN_LAYERS + 2
 #define INFINITE 0
-#define MAX_EPOCHS 500
-#define NEURONS 6
+#define MAX_EPOCHS 6000
+#define NEURONS 10
 #define OUTPUT_LAYER_NEURONS 1
 
 typedef struct neuron {
@@ -42,8 +42,6 @@ typedef struct neuralControllerConfig {
     int output_layer_neurons;
     int inputs;
     int max_epochs;
-    int infinite;
-    int one_shot;
     int initialized;
     double learning_rate;
     double setpoint;
@@ -54,8 +52,8 @@ typedef struct input {
     _Bool available;
 } input_st;
 
-int neuralController_Init(neuralControllerConfig_st* ncConfig, int (*fctPtr)());
-int neuralController_Run(neuralControllerConfig_st* ncConfig, double* pOutput, input_st* pInput);
+int neuralController_Init(neuralControllerConfig_st* ncConfig, float (*fctPtr)());
+int neuralController_Run(neuralControllerConfig_st* ncConfig, double* pOutput, float* pInput);
 double dTanh(double x);
 double sigmoid(double x);
 double dSigmoid(double x);

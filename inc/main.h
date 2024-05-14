@@ -7,8 +7,15 @@
 #include "supportLib.h"
 
 void* feedInput(void* arg);
-int generateRandomInt(void);
+float generateRandomInt(void);
+void i2_path(float u);
+void pt1_path(float u);
 
 static const char inifile[] = "F:/work/Neuro-Controller/cfg/config.ini";
+
+typedef struct i2 {
+    float yn_1;
+    float yn_12;
+} i2_st;
 
 #endif  // main_h
