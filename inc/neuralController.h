@@ -20,7 +20,7 @@
 
 #define INPUTS_BIGGER_THAN_NEURONS 0
 
-#define INPUTS 3
+#define INPUTS 2
 #define HIDDEN_LAYERS 3
 #define LAYERS HIDDEN_LAYERS + 2
 #define INFINITE 0

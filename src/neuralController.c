@@ -126,7 +126,7 @@ int neuralController_Run(neuralControllerConfig_st* ncConfig, double* pOutput, f
             therefore the program branches here
              */
             if (layer == ncConfig->hidden_layers) {
-                double sigma = act_new * dTanh(neuron[layer][neuronC].netoutput);
+                double sigma = rating * dTanh(neuron[layer][neuronC].netinput);
                 for (int k = 0; k < topology[layer]; k++) {
                     weights[layer][k][neuronC] += ncConfig->learning_rate * sigma * neuron[layer - 1][k].netoutput;
                     w++;
