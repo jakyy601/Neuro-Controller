@@ -11,11 +11,9 @@ typedef struct i2 {
     float yn2;
 } i2_st;
 
-void* feedInput(void* arg);
 float generateRandomInt(void);
-void pt2(double control_signal, double* x, double* x_dot);
-void pt1_path(float u);
-float i_path(float yn, float u);
+float i_plant(float yn, float u);
+double round_to_decimal_places(float value, int decimal_places);
 
 static const char inifile[] = "F:/work/Neuro-Controller/cfg/config.ini";
 

@@ -1,6 +1,6 @@
 /**
  * @file neural_controller.h
- * @author Jakob Schatzl (you@domain.com)
+ * @author Jakob Schatzl
  * @brief
  * @version 0.1
  * @date 2023-01-13

@@ -2,11 +2,13 @@ cmake_minimum_required(VERSION 3.18.4)
 
 project(Neural_Network)
 
+# project directories
 include_directories(
     ${CMAKE_SOURCE_DIR}/inc
     ${CMAKE_SOURCE_DIR}/src
 )
 
+# put source files into a variable
 file(
     GLOB main_srcs
     "${PROJECT_SOURCE_DIR}/src/neuralController.c"
@@ -14,13 +16,12 @@ file(
     "${PROJECT_SOURCE_DIR}/src/main.c"
 )
 
-file(
-    GLOB test3_srcs
-    "${PROJECT_SOURCE_DIR}/src/neuralController.c"
-    "${PROJECT_SOURCE_DIR}/inc/neuralController.h"
-    "${PROJECT_SOURCE_DIR}/src/ncHelper.h"
-    "${PROJECT_SOURCE_DIR}/src/ncHelper.c"
-    "${PROJECT_SOURCE_DIR}/misc/test3.c"
+add_library(
+    pthread
+    "${PROJECT_SOURCE_DIR}/lib/pthreads/include/_ptw32.h"
+    "${PROJECT_SOURCE_DIR}/lib/pthreads/include/pthread.h"
+    "${PROJECT_SOURCE_DIR}/lib/pthreads/include/sched.h"
+    "${PROJECT_SOURCE_DIR}/lib/pthreads/include/semaphore.h"
 )
 
 add_library(
@@ -36,30 +37,20 @@ add_library(
     "${PROJECT_SOURCE_DIR}/lib/minIni/minIni.c"
     "${PROJECT_SOURCE_DIR}/lib/minIni/minIni.h"
 )
-
-add_library(
-    pthread
-    "${PROJECT_SOURCE_DIR}/lib/pthreads/include/_ptw32.h"
-    "${PROJECT_SOURCE_DIR}/lib/pthreads/include/pthread.h"
-    "${PROJECT_SOURCE_DIR}/lib/pthreads/include/sched.h"
-    "${PROJECT_SOURCE_DIR}/lib/pthreads/include/semaphore.h"
-)
-
+# project internal libraries
 target_include_directories(
     pbPlots PUBLIC 
     "${PROJECT_SOURCE_DIR}/lib/pbPlots"
-    cJSON PUBLIC
-    "${PROJECT_SOURCE_DIR}/lib/cJSON"
     minIni PUBLIC
     "${PROJECT_SOURCE_DIR}/lib/minIni")
 
+# link project external libraries
 target_link_libraries(pthread -lpthread -LC:/src/vcpkg/vcpkg/installed/x64-windows/lib)
 set_target_properties(pthread PROPERTIES LINKER_LANGUAGE C)
 
-
+# create target
 add_executable(main ${main_srcs})
-add_executable(test3 ${test3_srcs})
 
+# link project libraries
 target_link_libraries(main PRIVATE pbPlots minIni pthread)
-target_link_libraries(test3 PRIVATE pbPlots minIni pthread)
 
