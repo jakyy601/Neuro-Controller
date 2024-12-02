@@ -28,6 +28,13 @@
                     "ignoreFailures": true
                 }
             ]
+        },
+        {
+            "name": "Python: Test parameters for NC",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/test/testParameters.py",
+            "console": "integratedTerminal"
         }
     ]
 }

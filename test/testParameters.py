@@ -1,23 +1,15 @@
 import subprocess
 import threading
+import os
 
-def stdout_log():
-    for line in iter(process.stdout.readline, ''):
-        if not(thread2.is_alive()):
-            break
-        print(line, end='\n')
+file = ".\\build\\main.exe"
 
-def monitor_process():
-    process.wait()
+args = ' 2 3 0.01 6000 8 1 1.0'
 
-file = "build\\main.exe"
+process_command = file + args
 
-args = ['2 3 0.01 6000 8 1 1.0']
+print(process_command)
 
-process = subprocess.Popen(file, args, stdout=subprocess.PIPE)
+process = subprocess.Popen(process_command, bufsize=0, shell=True)
 
-thread1 = threading.Thread(target=stdout_log)
-thread2 = threading.Thread(target=monitor_process)
-
-thread1.start()
-thread2.start()
+process.wait()
