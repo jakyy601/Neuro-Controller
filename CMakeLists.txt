@@ -10,10 +10,15 @@ include_directories(
 
 # put source files into a variable
 file(
-    GLOB main_srcs
+    GLOB neuralController
     "${PROJECT_SOURCE_DIR}/src/neuralController.c"
     "${PROJECT_SOURCE_DIR}/inc/neuralController.h"
+)
+
+file(
+    GLOB main
     "${PROJECT_SOURCE_DIR}/src/main.c"
+    "${PROJECT_SOURCE_DIR}/inc/main.h"
 )
 
 add_library(
@@ -42,15 +47,19 @@ target_include_directories(
     pbPlots PUBLIC 
     "${PROJECT_SOURCE_DIR}/lib/pbPlots"
     minIni PUBLIC
-    "${PROJECT_SOURCE_DIR}/lib/minIni")
+    "${PROJECT_SOURCE_DIR}/lib/minIni"
+)
 
 # link project external libraries
-target_link_libraries(pthread -lpthread -LC:/src/vcpkg/vcpkg/installed/x64-windows/lib)
+target_link_libraries(pthread -lpthread -lzmq m)
 set_target_properties(pthread PROPERTIES LINKER_LANGUAGE C)
 
 # create target
-add_executable(main ${main_srcs})
+add_executable(main ${main} ${neuralController})
 
 # link project libraries
 target_link_libraries(main PRIVATE pbPlots minIni pthread)
 
+#add_library(libNeuralController SHARED ${neuralController})
+#set_target_properties(libNeuralController PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+#set_target_properties(libNeuralController PROPERTIES OUTPUT_NAME "NeuralController")

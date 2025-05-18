@@ -40,7 +40,7 @@ double input_old[INPUTS];
  * @param fctPtr Pointer to a function that generates values between 0 and 1
  * @return 0 on success
  */
-int neuralController_Init(neuralControllerConfig_st* ncConfig, float (*fctPtr)()) {
+int neuralController_Init(neuralControllerConfig_st* ncConfig, float (*fctPtr)(), const char *filename) {
     memset(input, 0, ncConfig->inputs * sizeof(double));
     memset(weights, 0, (ncConfig->layers - 1) * (ncConfig->neurons) * (ncConfig->neurons) * sizeof(double));
     act_old = ncConfig->setpoint - 0;
@@ -60,6 +60,35 @@ int neuralController_Init(neuralControllerConfig_st* ncConfig, float (*fctPtr)()
 
     // double input[ncConfig->inputs];
 
+#if LOAD_WEIGHTS
+
+    void loadArrayFromFile(const char *filename) {
+        FILE *file = fopen(filename, "rb");
+        if (file == NULL) {
+            perror("Error opening file");
+            exit(EXIT_FAILURE);
+        }
+
+        // Read the entire 3D array from the file
+        size_t elements = total_weights;
+        fread(weights, sizeof(double), total_weights, file);
+        fclose(file);
+    }
+
+    /*Initialize weights and bias with values from the .bin and
+      initialize the rest with 0*/
+    for (int layer = 0; layer < ncConfig->layers; layer++) {
+        for (int j = 0; j < topology[layer]; j++) {
+            /*Initialize bias and everything else in the neuron struct*/
+            neuron[layer][j].bias = (double)(*fctPtr)();
+            neuron[layer][j].netinput = 0.0;
+            neuron[layer][j].netoutput = 0.0;
+            neuron[layer][j].sigma = 0.0;
+        }
+    }
+    ncConfig->initialized = 1;
+
+#else
     /*Initialize weights and bias with random values between 0 and 1 and
       initialize the rest with 0*/
     for (int layer = 0; layer < ncConfig->layers; layer++) {
@@ -78,6 +107,7 @@ int neuralController_Init(neuralControllerConfig_st* ncConfig, float (*fctPtr)()
         }
     }
     ncConfig->initialized = 1;
+#endif
 
     return 0;
 }
@@ -176,6 +206,19 @@ int neuralController_Run(neuralControllerConfig_st* ncConfig, double* pOutput, f
 
     *pOutput = neuron[ncConfig->hidden_layers][0].netoutput;
     return 0;
+}
+
+void saveArrayToFile(const char *filename) {
+    FILE *file = fopen(filename, "w");
+    if (file == NULL) {
+        perror("Error opening model file");
+        exit(EXIT_FAILURE);
+    }
+
+    // Write the entire 3D array to the file
+    fwrite(weights, sizeof(double), total_weights, file);
+
+    fclose(file);
 }
 
 /**

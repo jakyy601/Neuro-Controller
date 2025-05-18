@@ -10,8 +10,6 @@
  */
 #include "main.h"
 
-#include "neuralController.h"
-
 pthread_t feedInputThread;
 pthread_mutex_t mutex;
 
@@ -30,23 +28,10 @@ int main(int argc, const char* argv[]) {
     float yn = 0;                   // state of plant
     double output = 0.0;            // neural Network output
 
-    // array for all error values over n epochs
-    double* error_array = (double*)calloc(ncConfig.max_epochs, sizeof(double));
-    double* x_values = (double*)calloc(ncConfig.max_epochs, sizeof(int));
-
     // end pointer for strtol
     char* end;
 
-    // initialize the neural controller config via a inifile
-    // ncConfig.inputs = ini_getl("Neural Network", "inputs", -1, inifile);
-    // ncConfig.hidden_layers = ini_getl("Neural Network", "hidden_layers", -1, inifile);
-    // ncConfig.layers = ncConfig.hidden_layers + 2;
-    // ncConfig.learning_rate = round(ini_getf("Neural Network", "learning_rate", -1, inifile) * 100) / 100;
-    // ncConfig.max_epochs = ini_getl("Neural Network", "max_epochs", -1, inifile);
-    // ncConfig.neurons = ini_getl("Neural Network", "neurons", -1, inifile);
-    // ncConfig.output_layer_neurons = ini_getl("Neural Network", "output_layer_neurons", -1, inifile);
-    // ncConfig.setpoint = round(ini_getf("Neural Network", "setpoint", -1, inifile) * 100) / 100;
-
+    // initialize the neural controller config via command line arguments
     ncConfig.inputs = (int)strtol(argv[1], &end, 10);
     ncConfig.hidden_layers = (int)strtol(argv[2], &end, 10);
     ncConfig.layers = ncConfig.hidden_layers + 2;
@@ -56,6 +41,20 @@ int main(int argc, const char* argv[]) {
     ncConfig.output_layer_neurons = (int)strtol(argv[6], &end, 10);
     ncConfig.setpoint = (float)roundf(strtof(argv[7], &end) * 100) / 100;
 
+    // array for all error values over n epochs
+    float* error_array = (float*)calloc(ncConfig.max_epochs, sizeof(float));
+    int* x_values = (int*)calloc(ncConfig.max_epochs, sizeof(int));
+
+    // variables for write to file
+    char filename[100];
+    strncpy(filename, argv[8], sizeof(filename) - 1);
+    filename[sizeof(filename) - 1] = '\0';  // Ensure null-termination
+    int column = (int)strtol(argv[9], &end, 10);
+    if (column <= 0) {
+        fprintf(stderr, "Invalid column value: %d\n", column);
+        return 1;
+    }
+
     // set seed for rand() function
     srand(time(NULL));
 
@@ -64,28 +63,44 @@ int main(int argc, const char* argv[]) {
     randFctPtr = &generateRandomInt;
 
     // Initialize the neuralController
-    neuralController_Init(&ncConfig, randFctPtr);
+    neuralController_Init(&ncConfig, randFctPtr, "test.bin");
+
+    /*Configuration for ZeroMQ as Sender/Server*/
+    void *context = zmq_ctx_new();
+    void *socket = zmq_socket(context, ZMQ_REP);
+    int rc = zmq_bind(socket, "tcp://localhost:5555");
+    if(rc != 0){
+        printf("Error: %d\n");
+        exit(EXIT_FAILURE);
+    }
+    char rxBuffer[15] = {0};
+    char txBuffer[15] = {0};
 
     // Loop for testing over n epochs
     for (int i = 0; i < ncConfig.max_epochs; i++) {
-        // Run through feed forward + backpropagation
-        neuralController_Run(&ncConfig, &output, input);
-        // Calculate next state of the I plant
-        yn = i_plant(yn, output);
+        rc = zmq_recv(socket, rxBuffer, sizeof(rxBuffer), 0);
+        yn = atof(rxBuffer);
         // set input for the next run
         input[0] = yn;
+        // Run through feed forward + backpropagation
+        neuralController_Run(&ncConfig, &output, input);
+        /*Calculate next state of the I plant*/
+        //yn = i_plant(yn, output);
+        int ret = sprintf(txBuffer, "%f", output);
+        rc = zmq_send(socket, txBuffer, ret, 0);
         // save error
         // error_array[i] = (double)ncConfig.setpoint - yn;
         error_array[i] = yn;
         // save epoch
         x_values[i] = i;
         // debug print message
-        if ((i % 10) == 0) {
+        if ((i % 100) == 0) {
             printf("Epoch: %d Plant output: %f Error: %f u: %f \n", i, yn, ncConfig.setpoint - yn, output);
             fflush(stdout);
         }
     }
 
+#if PlotGraph
     // Create image reference structure
     RGBABitmapImageReference* imageRef = CreateRGBABitmapImageReference();
 
@@ -98,6 +113,31 @@ int main(int argc, const char* argv[]) {
     WriteToFile(pngData, length, "control.png");
     DeleteImage(imageRef->image);
     FreeAllocations();
+#endif  // PlotGraph
+
+#if WriteToFile
+
+    FILE* file = fopen(filename, "r+");  // Open file in read+write mode
+    if (file == NULL) {
+        perror("Error opening results file");
+        return 1;
+    }else{
+        int i = 0;
+        char character;
+        while ((character = fgetc(file)) != EOF) {
+            if (character == '\n') {
+                fprintf(file, ", %f\n", error_array[i]);
+                i++;
+            }
+        }
+    }
+
+    fclose(file);
+
+#endif  // WriteToFile
+
+    //Write weights to file
+    saveArrayToFile("test.bin");
 
     // free allocated memory
     free(error_array);

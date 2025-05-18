@@ -27,6 +27,7 @@
 #define MAX_EPOCHS 6000
 #define NEURONS 10
 #define OUTPUT_LAYER_NEURONS 1
+#define LOAD_WEIGHTS false
 
 typedef struct neuron {
     double netinput;
@@ -52,8 +53,9 @@ typedef struct input {
     _Bool available;
 } input_st;
 
-int neuralController_Init(neuralControllerConfig_st* ncConfig, float (*fctPtr)());
+int neuralController_Init(neuralControllerConfig_st* ncConfig, float (*fctPtr)(), const char *filename);
 int neuralController_Run(neuralControllerConfig_st* ncConfig, double* pOutput, float* pInput);
+void saveArrayToFile(const char *filename);
 double dTanh(double x);
 double sigmoid(double x);
 double dSigmoid(double x);

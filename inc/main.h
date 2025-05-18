@@ -6,6 +6,14 @@
 #include "pthread.h"
 #include "supportLib.h"
 
+#include <errno.h>
+#include <zmq.h>
+
+#include "neuralController.h"
+
+#define PlotGraph false
+#define WriteToFile false
+
 typedef struct i2 {
     float yn;
     float yn2;
