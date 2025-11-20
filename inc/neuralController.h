@@ -53,8 +53,9 @@ typedef struct input {
     _Bool available;
 } input_st;
 
-int neuralController_Init(neuralControllerConfig_st* ncConfig, float (*fctPtr)(), const char *filename);
-int neuralController_Run(neuralControllerConfig_st* ncConfig, double* pOutput, float* pInput);
+int neuralController_Init(neuralControllerConfig_st* ncConfig, float (*fctPtr)(), double*** weight, neuron_st** neuron);
+int neuralController_Run(neuralControllerConfig_st* ncConfig, double* pOutput, float* pInput, double*** weight, neuron_st** neuron);
+int neuralController_Free(double ***weight, neuron_st **neuron);
 void saveArrayToFile(const char *filename);
 double dTanh(double x);
 double sigmoid(double x);

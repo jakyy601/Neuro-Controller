@@ -7,7 +7,7 @@
 #include "supportLib.h"
 
 #include <errno.h>
-#include <zmq.h>
+//#include <zmq.h>
 
 #include "neuralController.h"
 

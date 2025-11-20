@@ -51,7 +51,7 @@ target_include_directories(
 )
 
 # link project external libraries
-target_link_libraries(pthread -lpthread -lzmq m)
+target_link_libraries(pthread -lpthread m)
 set_target_properties(pthread PROPERTIES LINKER_LANGUAGE C)
 
 # create target

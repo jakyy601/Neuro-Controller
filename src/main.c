@@ -41,6 +41,10 @@ int main(int argc, const char* argv[]) {
     ncConfig.output_layer_neurons = (int)strtol(argv[6], &end, 10);
     ncConfig.setpoint = (float)roundf(strtof(argv[7], &end) * 100) / 100;
 
+    // Neural Network
+    double ***weight = NULL;
+    neuron_st **neuron = NULL; 
+
     // array for all error values over n epochs
     float* error_array = (float*)calloc(ncConfig.max_epochs, sizeof(float));
     int* x_values = (int*)calloc(ncConfig.max_epochs, sizeof(int));
@@ -63,31 +67,16 @@ int main(int argc, const char* argv[]) {
     randFctPtr = &generateRandomInt;
 
     // Initialize the neuralController
-    neuralController_Init(&ncConfig, randFctPtr, "test.bin");
-
-    /*Configuration for ZeroMQ as Sender/Server*/
-    void *context = zmq_ctx_new();
-    void *socket = zmq_socket(context, ZMQ_REP);
-    int rc = zmq_bind(socket, "tcp://localhost:5555");
-    if(rc != 0){
-        printf("Error: %d\n");
-        exit(EXIT_FAILURE);
-    }
-    char rxBuffer[15] = {0};
-    char txBuffer[15] = {0};
+    neuralController_Init(&ncConfig, randFctPtr, weight, neuron);
 
     // Loop for testing over n epochs
     for (int i = 0; i < ncConfig.max_epochs; i++) {
-        rc = zmq_recv(socket, rxBuffer, sizeof(rxBuffer), 0);
-        yn = atof(rxBuffer);
         // set input for the next run
         input[0] = yn;
         // Run through feed forward + backpropagation
-        neuralController_Run(&ncConfig, &output, input);
+        neuralController_Run(&ncConfig, &output, input, weight, neuron);
         /*Calculate next state of the I plant*/
-        //yn = i_plant(yn, output);
-        int ret = sprintf(txBuffer, "%f", output);
-        rc = zmq_send(socket, txBuffer, ret, 0);
+        yn = i_plant(yn, output);
         // save error
         // error_array[i] = (double)ncConfig.setpoint - yn;
         error_array[i] = yn;
@@ -142,6 +131,7 @@ int main(int argc, const char* argv[]) {
     // free allocated memory
     free(error_array);
     free(x_values);
+    neuralController_Free(weight, neuron);
 
     return 42;
 }

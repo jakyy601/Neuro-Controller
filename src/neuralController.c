@@ -21,14 +21,14 @@
  * @return -
  */
 
-static neuron_st neuron[LAYERS - 1][NEURONS];
-static double weights[LAYERS - 1][NEURONS][NEURONS];
+//static neuron_st neuron[LAYERS - 1][NEURONS];
+//static double weight[LAYERS - 1][NEURONS][NEURONS];
 
 static double act_old = 0;
 static double act_new = 0;
 static double rating = 0;
 static int total_neurons = 0;
-static int total_weights = 0;
+static int total_weight = 0;
 static int topology[LAYERS];
 double input[INPUTS];
 double input_old[INPUTS];
@@ -40,14 +40,14 @@ double input_old[INPUTS];
  * @param fctPtr Pointer to a function that generates values between 0 and 1
  * @return 0 on success
  */
-int neuralController_Init(neuralControllerConfig_st* ncConfig, float (*fctPtr)(), const char *filename) {
+int neuralController_Init(neuralControllerConfig_st* ncConfig, float (*fctPtr)(), double*** weight, neuron_st** neuron) {
     memset(input, 0, ncConfig->inputs * sizeof(double));
-    memset(weights, 0, (ncConfig->layers - 1) * (ncConfig->neurons) * (ncConfig->neurons) * sizeof(double));
+    //memset(weight, 0, (ncConfig->layers - 1) * (ncConfig->neurons) * (ncConfig->neurons) * sizeof(double));
     act_old = ncConfig->setpoint - 0;
 
     // double *error_array = calloc(ncConfig->max_epochs, sizeof(double));
     total_neurons = ncConfig->neurons * ncConfig->hidden_layers + ncConfig->output_layer_neurons;
-    total_weights = (ncConfig->inputs * ncConfig->neurons) + (ncConfig->neurons * ncConfig->neurons * (ncConfig->hidden_layers - 1)) + (ncConfig->neurons * ncConfig->output_layer_neurons);
+    total_weight = (ncConfig->inputs * ncConfig->neurons) + (ncConfig->neurons * ncConfig->neurons * (ncConfig->hidden_layers - 1)) + (ncConfig->neurons * ncConfig->output_layer_neurons);
     for (int i = 0; i < ncConfig->layers; i++) {
         if (i == ncConfig->layers - 1) {
             topology[i] = ncConfig->output_layer_neurons;
@@ -60,7 +60,7 @@ int neuralController_Init(neuralControllerConfig_st* ncConfig, float (*fctPtr)()
 
     // double input[ncConfig->inputs];
 
-#if LOAD_WEIGHTS
+#if LOAD_weight
 
     void loadArrayFromFile(const char *filename) {
         FILE *file = fopen(filename, "rb");
@@ -70,12 +70,12 @@ int neuralController_Init(neuralControllerConfig_st* ncConfig, float (*fctPtr)()
         }
 
         // Read the entire 3D array from the file
-        size_t elements = total_weights;
-        fread(weights, sizeof(double), total_weights, file);
+        size_t elements = total_weight;
+        fread(weight, sizeof(double), total_weight, file);
         fclose(file);
     }
 
-    /*Initialize weights and bias with values from the .bin and
+    /*Initialize weight and bias with values from the .bin and
       initialize the rest with 0*/
     for (int layer = 0; layer < ncConfig->layers; layer++) {
         for (int j = 0; j < topology[layer]; j++) {
@@ -89,15 +89,20 @@ int neuralController_Init(neuralControllerConfig_st* ncConfig, float (*fctPtr)()
     ncConfig->initialized = 1;
 
 #else
-    /*Initialize weights and bias with random values between 0 and 1 and
+    /*Initialize weight and bias with random values between 0 and 1 and
       initialize the rest with 0*/
+    weight = (double ***)calloc(ncConfig->layers, sizeof(double **));
+    neuron = (neuron_st **)calloc(ncConfig->layers, sizeof(neuron_st *));
     for (int layer = 0; layer < ncConfig->layers; layer++) {
+        weight[layer] = (double **)calloc(topology[layer], sizeof(double *));
+        neuron[layer] = (neuron_st *)calloc(topology[layer], sizeof(neuron_st));
         for (int j = 0; j < topology[layer]; j++) {
-            /*Initialize weights between inputs and first layer*/
+            /*Initialize weight between inputs and first layer*/
+            weight[layer][j] = (double *)calloc(topology[layer + 1], sizeof(double));
             for (int k = 0; k < topology[layer + 1]; k++) {
                 if (layer == ncConfig->layers - 1)
                     break;
-                weights[layer][j][k] = (double)(*fctPtr)();
+                weight[layer][j][k] = (double)(*fctPtr)();
             }
             /*Initialize bias and everything else in the neuron struct*/
             neuron[layer][j].bias = (double)(*fctPtr)();
@@ -120,7 +125,7 @@ int neuralController_Init(neuralControllerConfig_st* ncConfig, float (*fctPtr)()
  * @param pInput Forward pass network input
  * @return 0 on success
  */
-int neuralController_Run(neuralControllerConfig_st* ncConfig, double* pOutput, float* pInput) {
+int neuralController_Run(neuralControllerConfig_st* ncConfig, double* pOutput, float* pInput, double*** weight, neuron_st** neuron) {
     int n = 0;
     int w = 0;
     float d2 = 0;
@@ -137,9 +142,9 @@ int neuralController_Run(neuralControllerConfig_st* ncConfig, double* pOutput, f
             double sum = 0.0;
             for (int k = 0; k < topology[layer]; k++) {
                 if (layer == 0)
-                    sum += input[k] * weights[layer][k][j];
+                    sum += input[k] * weight[layer][k][j];
                 else
-                    sum += neuron[layer - 1][k].netoutput * weights[layer][k][j];
+                    sum += neuron[layer - 1][k].netoutput * weight[layer][k][j];
             }
             neuron[layer][j].netinput = sum;
             if (layer == ncConfig->hidden_layers)
@@ -174,7 +179,7 @@ int neuralController_Run(neuralControllerConfig_st* ncConfig, double* pOutput, f
             if (layer == ncConfig->hidden_layers) {
                 double sigma = rating * dTanh(neuron[layer][neuronC].netinput);
                 for (int k = 0; k < topology[layer]; k++) {
-                    weights[layer][k][neuronC] += ncConfig->learning_rate * sigma * neuron[layer - 1][k].netoutput;
+                    weight[layer][k][neuronC] += ncConfig->learning_rate * sigma * neuron[layer - 1][k].netoutput;
                     w++;
                 }
                 neuron[layer][neuronC].bias += ncConfig->learning_rate * sigma;
@@ -183,14 +188,14 @@ int neuralController_Run(neuralControllerConfig_st* ncConfig, double* pOutput, f
             } else {
                 double errorSum = 0;
                 for (int k = 0; k < topology[layer + 2]; k++) {
-                    errorSum += neuron[layer + 1][k].sigma * weights[layer + 1][neuronC][k];
+                    errorSum += neuron[layer + 1][k].sigma * weight[layer + 1][neuronC][k];
                 }
                 double sigma = errorSum * dTanh(neuron[layer][neuronC].netinput);
                 for (int k = 0; k < topology[layer]; k++) {
                     if (layer > 0)
-                        weights[layer][k][neuronC] += ncConfig->learning_rate * sigma * neuron[layer - 1][k].netoutput;
+                        weight[layer][k][neuronC] += ncConfig->learning_rate * sigma * neuron[layer - 1][k].netoutput;
                     else
-                        weights[layer][k][neuronC] += ncConfig->learning_rate * sigma * input[k];
+                        weight[layer][k][neuronC] += ncConfig->learning_rate * sigma * input[k];
                     w++;
                 }
                 neuron[layer][neuronC].bias += ncConfig->learning_rate * sigma;
@@ -199,13 +204,25 @@ int neuralController_Run(neuralControllerConfig_st* ncConfig, double* pOutput, f
             }
         }
     }
-    assert(w == total_weights);
+    assert(w == total_weight);
     assert(n == total_neurons);
     w = 0;
     n = 0;
 
     *pOutput = neuron[ncConfig->hidden_layers][0].netoutput;
     return 0;
+}
+
+int neuralController_Free(double ***weight, neuron_st **neuron) {
+    for(int j = 0; j < topology[j]; j++){
+        for(int i = 0; i < topology[j + 1]; i++){
+            free(weight[j][i]);
+        }
+        free(weight[j]);
+        free(neuron[j]);
+    }
+    free(weight);
+    free(neuron);
 }
 
 void saveArrayToFile(const char *filename) {
@@ -216,7 +233,7 @@ void saveArrayToFile(const char *filename) {
     }
 
     // Write the entire 3D array to the file
-    fwrite(weights, sizeof(double), total_weights, file);
+    //fwrite(weight, sizeof(double), total_weight, file);
 
     fclose(file);
 }
