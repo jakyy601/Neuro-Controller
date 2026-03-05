@@ -29,7 +29,7 @@ static double act_new = 0;
 static double rating = 0;
 static int total_neurons = 0;
 static int total_weight = 0;
-static int topology[LAYERS];
+int topology[LAYERS];
 double input[INPUTS];
 double input_old[INPUTS];
 
@@ -40,7 +40,7 @@ double input_old[INPUTS];
  * @param fctPtr Pointer to a function that generates values between 0 and 1
  * @return 0 on success
  */
-int neuralController_Init(neuralControllerConfig_st* ncConfig, float (*fctPtr)(), double*** weight, neuron_st** neuron) {
+int neuralController_Init(neuralControllerConfig_st* ncConfig, float (*fctPtr)(), double**** pWeight, neuron_st*** pNeuron) {
     memset(input, 0, ncConfig->inputs * sizeof(double));
     //memset(weight, 0, (ncConfig->layers - 1) * (ncConfig->neurons) * (ncConfig->neurons) * sizeof(double));
     act_old = ncConfig->setpoint - 0;
@@ -91,8 +91,8 @@ int neuralController_Init(neuralControllerConfig_st* ncConfig, float (*fctPtr)()
 #else
     /*Initialize weight and bias with random values between 0 and 1 and
       initialize the rest with 0*/
-    weight = (double ***)calloc(ncConfig->layers, sizeof(double **));
-    neuron = (neuron_st **)calloc(ncConfig->layers, sizeof(neuron_st *));
+    double ***weight = (double ***)calloc(ncConfig->layers, sizeof(double **));
+    neuron_st **neuron = (neuron_st **)calloc(ncConfig->layers, sizeof(neuron_st *));
     for (int layer = 0; layer < ncConfig->layers; layer++) {
         weight[layer] = (double **)calloc(topology[layer], sizeof(double *));
         neuron[layer] = (neuron_st *)calloc(topology[layer], sizeof(neuron_st));
@@ -111,6 +111,8 @@ int neuralController_Init(neuralControllerConfig_st* ncConfig, float (*fctPtr)()
             neuron[layer][j].sigma = 0.0;
         }
     }
+    *pWeight = weight;
+    *pNeuron = neuron;
     ncConfig->initialized = 1;
 #endif
 
@@ -213,13 +215,16 @@ int neuralController_Run(neuralControllerConfig_st* ncConfig, double* pOutput, f
     return 0;
 }
 
-int neuralController_Free(double ***weight, neuron_st **neuron) {
-    for(int j = 0; j < topology[j]; j++){
-        for(int i = 0; i < topology[j + 1]; i++){
-            free(weight[j][i]);
+void neuralController_Free(neuralControllerConfig_st* ncConfig, double ***weight, neuron_st **neuron) {
+    if((!weight) || (!neuron) || (!ncConfig))
+        return;
+
+    for(int layer = 0; layer < ncConfig->layers; layer++){
+        for(int j = 0; j < topology[layer]; j++){
+            free(weight[layer][j]);
         }
-        free(weight[j]);
-        free(neuron[j]);
+        free(weight[layer]);
+        free(neuron[layer]);
     }
     free(weight);
     free(neuron);

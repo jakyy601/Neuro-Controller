@@ -67,7 +67,7 @@ int main(int argc, const char* argv[]) {
     randFctPtr = &generateRandomInt;
 
     // Initialize the neuralController
-    neuralController_Init(&ncConfig, randFctPtr, weight, neuron);
+    neuralController_Init(&ncConfig, randFctPtr, &weight, &neuron);
 
     // Loop for testing over n epochs
     for (int i = 0; i < ncConfig.max_epochs; i++) {
@@ -126,12 +126,16 @@ int main(int argc, const char* argv[]) {
 #endif  // WriteToFile
 
     //Write weights to file
-    saveArrayToFile("test.bin");
+    //saveArrayToFile("test.bin");
 
     // free allocated memory
     free(error_array);
     free(x_values);
-    neuralController_Free(weight, neuron);
+
+    neuralController_Free(&ncConfig, weight, neuron);
+    free(weight);
+    free(neuron);
+    
 
     return 42;
 }
