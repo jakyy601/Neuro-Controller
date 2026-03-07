@@ -57,6 +57,7 @@ dkms.conf
 
 # Logs
 *log*
+*vgcore*
 
 # Chache
 *cache*

@@ -85,7 +85,6 @@ int main(int argc, const char* argv[]) {
         // debug print message
         if ((i % 100) == 0) {
             printf("Epoch: %d Plant output: %f Error: %f u: %f \n", i, yn, ncConfig.setpoint - yn, output);
-            fflush(stdout);
         }
     }
 
@@ -133,9 +132,6 @@ int main(int argc, const char* argv[]) {
     free(x_values);
 
     neuralController_Free(&ncConfig, weight, neuron);
-    free(weight);
-    free(neuron);
-    
 
     return 42;
 }
