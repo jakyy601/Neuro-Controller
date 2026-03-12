@@ -16,6 +16,11 @@ file(
 )
 
 file(
+    GLOB pythonInterface
+    "${PROJECT_SOURCE_DIR}/src/pythonInterface.c"
+)
+
+file(
     GLOB main
     "${PROJECT_SOURCE_DIR}/src/main.c"
     "${PROJECT_SOURCE_DIR}/inc/main.h"
@@ -54,11 +59,23 @@ target_include_directories(
 target_link_libraries(pthread -lpthread m)
 set_target_properties(pthread PROPERTIES LINKER_LANGUAGE C)
 
+# find python installation for the pythonInterface
+find_package(Python3 REQUIRED COMPONENTS Interpreter Development.Module)
+
+# create library for python
+add_library(neuralController MODULE ${neuralController} ${pythonInterface})
+set_target_properties(neuralController PROPERTIES
+    PREFIX ""
+    SUFFIX ".so"
+)
+target_include_directories(neuralController PRIVATE ${Python3_INCLUDE_DIRS})
+
 # create target
 add_executable(main ${main} ${neuralController})
 
 # link project libraries
 target_link_libraries(main PRIVATE pbPlots minIni pthread)
+target_link_libraries(neuralController PRIVATE Python3::Module)
 
 #add_library(libNeuralController SHARED ${neuralController})
 #set_target_properties(libNeuralController PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
