@@ -44,6 +44,7 @@ int main(int argc, const char* argv[]) {
     // Neural Network
     double ***weight = NULL;
     neuron_st **neuron = NULL; 
+    control_st control = {0};
 
     // array for all error values over n epochs
     float* error_array = (float*)calloc(ncConfig.max_epochs, sizeof(float));
@@ -67,14 +68,14 @@ int main(int argc, const char* argv[]) {
     randFctPtr = &generateRandomInt;
 
     // Initialize the neuralController
-    neuralController_Init(&ncConfig, randFctPtr, &weight, &neuron);
+    neuralController_Init(&ncConfig, &control, randFctPtr, &weight, &neuron);
 
     // Loop for testing over n epochs
     for (int i = 0; i < ncConfig.max_epochs; i++) {
         // set input for the next run
         input[0] = yn;
         // Run through feed forward + backpropagation
-        neuralController_Run(&ncConfig, &output, input, weight, neuron);
+        neuralController_Run(&ncConfig, &control, &output, input, weight, neuron);
         /*Calculate next state of the I plant*/
         yn = i_plant(yn, output);
         // save error
@@ -131,7 +132,7 @@ int main(int argc, const char* argv[]) {
     free(error_array);
     free(x_values);
 
-    neuralController_Free(&ncConfig, weight, neuron);
+    neuralController_Free(&ncConfig, &control, weight, neuron);
 
     return 42;
 }

@@ -36,6 +36,12 @@ typedef struct neuron {
     double sigma;
 } neuron_st;
 
+typedef struct arch {
+    int *topology;
+    int total_neurons;
+    int total_weights;
+} arch_st;
+
 typedef struct neuralControllerConfig {
     int hidden_layers;
     int layers;
@@ -46,7 +52,16 @@ typedef struct neuralControllerConfig {
     int initialized;
     double learning_rate;
     double setpoint;
+    arch_st arch;
 } neuralControllerConfig_st;
+
+typedef struct control {
+    double act_old;
+    double act_new;
+    double rating;
+    double *input;
+    double *input_old;
+} control_st;
 
 typedef struct input {
     double value;
@@ -55,9 +70,9 @@ typedef struct input {
 
 extern int topology[LAYERS];
 
-int neuralController_Init(neuralControllerConfig_st* ncConfig, float (*fctPtr)(), double**** pWeight, neuron_st*** pNeuron);
-int neuralController_Run(neuralControllerConfig_st* ncConfig, double* pOutput, float* pInput, double*** weight, neuron_st** neuron);
-void neuralController_Free(neuralControllerConfig_st* ncConfig, double ***weight, neuron_st **neuron);
+int neuralController_Init(neuralControllerConfig_st* ncConfig, control_st *control, float (*fctPtr)(), double**** pWeight, neuron_st*** pNeuron);
+int neuralController_Run(neuralControllerConfig_st* ncConfig, control_st *control, double* pOutput, float* pInput, double*** weight, neuron_st** neuron);
+void neuralController_Free(neuralControllerConfig_st* ncConfig, control_st *control, double ***weight, neuron_st **neuron);
 void saveArrayToFile(const char *filename);
 double dTanh(double x);
 double sigmoid(double x);
