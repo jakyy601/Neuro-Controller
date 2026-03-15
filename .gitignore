@@ -61,3 +61,9 @@ dkms.conf
 
 # Chache
 *cache*
+test.csv
+scripts/neuralControllerInterface.cpython-314-x86_64-linux-gnu
+scripts/pythonInterface.egg-info/dependency_links.txt
+scripts/pythonInterface.egg-info/PKG-INFO
+scripts/pythonInterface.egg-info/SOURCES.txt
+scripts/pythonInterface.egg-info/top_level.txt

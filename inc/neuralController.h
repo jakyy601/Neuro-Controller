@@ -18,18 +18,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define INPUTS_BIGGER_THAN_NEURONS 0
-
-#define INPUTS 2
-#define HIDDEN_LAYERS 3
-#define LAYERS HIDDEN_LAYERS + 2
-#define INFINITE 0
-#define MAX_EPOCHS 6000
-#define NEURONS 10
-#define OUTPUT_LAYER_NEURONS 1
 #define LOAD_WEIGHTS false
 
 typedef struct neuron {
+#ifdef PYTHON_EXPORT
+    PyObject_HEAD
+#endif
     double netinput;
     double netoutput;
     double bias;
@@ -37,12 +31,18 @@ typedef struct neuron {
 } neuron_st;
 
 typedef struct arch {
+#ifdef PYTHON_EXPORT
+    PyObject_HEAD
+#endif
     int *topology;
     int total_neurons;
     int total_weights;
 } arch_st;
 
 typedef struct neuralControllerConfig {
+#ifdef PYTHON_EXPORT
+    PyObject_HEAD
+#endif
     int hidden_layers;
     int layers;
     int neurons;
@@ -56,6 +56,9 @@ typedef struct neuralControllerConfig {
 } neuralControllerConfig_st;
 
 typedef struct control {
+#ifdef PYTHON_EXPORT
+    PyObject_HEAD
+#endif
     double act_old;
     double act_new;
     double rating;
@@ -64,11 +67,12 @@ typedef struct control {
 } control_st;
 
 typedef struct input {
+#ifdef PYTHON_EXPORT
+    PyObject_HEAD
+#endif
     double value;
     _Bool available;
 } input_st;
-
-extern int topology[LAYERS];
 
 int neuralController_Init(neuralControllerConfig_st* ncConfig, control_st *control, float (*fctPtr)(), double**** pWeight, neuron_st*** pNeuron);
 int neuralController_Run(neuralControllerConfig_st* ncConfig, control_st *control, double* pOutput, float* pInput, double*** weight, neuron_st** neuron);

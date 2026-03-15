@@ -24,9 +24,9 @@ pthread_mutex_t mutex;
 int main(int argc, const char* argv[]) {
     // create the neural controller config
     neuralControllerConfig_st ncConfig;
-    float input[INPUTS - 1] = {0};  // input array
     float yn = 0;                   // state of plant
     double output = 0.0;            // neural Network output
+    float *input = NULL;
 
     // end pointer for strtol
     char* end;
@@ -40,6 +40,8 @@ int main(int argc, const char* argv[]) {
     ncConfig.neurons = (int)strtol(argv[5], &end, 10);
     ncConfig.output_layer_neurons = (int)strtol(argv[6], &end, 10);
     ncConfig.setpoint = (float)roundf(strtof(argv[7], &end) * 100) / 100;
+
+    input = (float*)calloc(ncConfig.inputs, sizeof(float));
 
     // Neural Network
     double ***weight = NULL;
@@ -131,6 +133,7 @@ int main(int argc, const char* argv[]) {
     // free allocated memory
     free(error_array);
     free(x_values);
+    free(input);
 
     neuralController_Free(&ncConfig, &control, weight, neuron);
 

@@ -16,8 +16,9 @@ file(
 )
 
 file(
-    GLOB pythonInterface
-    "${PROJECT_SOURCE_DIR}/src/pythonInterface.c"
+    GLOB neuralControllerInterfaceSrc
+    "${PROJECT_SOURCE_DIR}/src/neuralControllerInterface.c"
+    "${PROJECT_SOURCE_DIR}/inc/neuralControllerInterface.h"
 )
 
 file(
@@ -59,23 +60,23 @@ target_include_directories(
 target_link_libraries(pthread -lpthread m)
 set_target_properties(pthread PROPERTIES LINKER_LANGUAGE C)
 
-# find python installation for the pythonInterface
+# find python installation for the neuralControllerInterface
 find_package(Python3 REQUIRED COMPONENTS Interpreter Development.Module)
 
-# create library for python
-add_library(neuralController MODULE ${neuralController} ${pythonInterface})
-set_target_properties(neuralController PROPERTIES
+# create target library for python
+add_library(neuralControllerInterface MODULE ${neuralController} ${neuralControllerInterfaceSrc})
+set_target_properties(neuralControllerInterface PROPERTIES
     PREFIX ""
-    SUFFIX ".so"
+    SUFFIX ".cpython-314-x86_64-linux-gnu"
 )
-target_include_directories(neuralController PRIVATE ${Python3_INCLUDE_DIRS})
+target_include_directories(neuralControllerInterface PRIVATE ${Python3_INCLUDE_DIRS})
 
-# create target
+# create target main
 add_executable(main ${main} ${neuralController})
 
 # link project libraries
 target_link_libraries(main PRIVATE pbPlots minIni pthread)
-target_link_libraries(neuralController PRIVATE Python3::Module)
+target_link_libraries(neuralControllerInterface PRIVATE Python3::Module)
 
 #add_library(libNeuralController SHARED ${neuralController})
 #set_target_properties(libNeuralController PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})

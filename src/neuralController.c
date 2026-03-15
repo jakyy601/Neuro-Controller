@@ -23,7 +23,10 @@
 
 /**
  * @brief Initializes the neural controller
- *
+ * @details Parses the neuralControllConfig_st config and calculates the topology(layers + hidden layers) of the network, as well as
+ *          the toal weights and neurons (these are used solely for debugging purposes). Then it allocates memory on the basis of the
+ *          topology array and finally initializes the values of the weights and biases using the fctPtr function, which ideally should
+ *          be a function generating values between 0 and 1.
  * @param ncConfig neuralControllerConfi_st structure
  * @param fctPtr Pointer to a function that generates values between 0 and 1
  * @return 0 on success
@@ -48,8 +51,6 @@ int neuralController_Init(neuralControllerConfig_st* ncConfig, control_st *contr
             ncConfig->arch.topology[i] = ncConfig->neurons;
         }
     }
-
-    // double input[ncConfig->inputs];
 
 #if LOAD_weight
 
@@ -79,7 +80,8 @@ int neuralController_Init(neuralControllerConfig_st* ncConfig, control_st *contr
     }
     ncConfig->initialized = 1;
 
-#else
+#else /*LOAD_weight*/
+
     /*Initialize weight and bias with random values between 0 and 1 and
       initialize the rest with 0*/
     double ***weight = (double ***)calloc(ncConfig->layers - 1, sizeof(double **));
@@ -107,17 +109,22 @@ int neuralController_Init(neuralControllerConfig_st* ncConfig, control_st *contr
     *pWeight = weight;
     *pNeuron = neuron;
     ncConfig->initialized = 1;
-#endif
+    
+#endif /*LOAD_weight*/
 
     return 0;
 }
 
 /**
- * @brief Iterates once through the forward and backwards pass
- *
+ * @brief Iterates once through the forward and backwards pass.
+ * @details Parses the input pointer, caluclates a forward pass, then caluclates values used for reinforcement learning and controlling parameters, 
+ *          which are then written into the pOutput pointer, and finally calulates the backwards pass.
  * @param ncConfig neuralControllerConfig_st structure
+ * @param control The control_st structure with the input and input_old arrays
  * @param pOutput Forward pass network output
  * @param pInput Forward pass network input
+ * @param weight The array for the weights
+ * @param neuron The neuron_st array
  * @return 0 on success
  */
 int neuralController_Run(neuralControllerConfig_st* ncConfig, control_st *control, double* pOutput, float* pInput, double*** weight, neuron_st** neuron) {
@@ -152,7 +159,7 @@ int neuralController_Run(neuralControllerConfig_st* ncConfig, control_st *contro
     assert(n == ncConfig->arch.total_neurons);
     n = 0;
 
-    d2 = control->input[INPUTS - 1] - control->input_old[INPUTS - 1];
+    d2 = control->input[ncConfig->inputs - 1] - control->input_old[ncConfig->inputs - 1];
     memcpy(control->input_old, &control->input, ncConfig->inputs);
 
     control->act_new = ncConfig->setpoint - control->input[1];
@@ -208,6 +215,14 @@ int neuralController_Run(neuralControllerConfig_st* ncConfig, control_st *contro
     return 0;
 }
 
+/**
+ * @brief Frees the allocated memory used for the neural controller.
+ * @details Frees the allocated memory of the weights array, the neuron array, the input array, the input_old array and the topology array.
+ * @param ncConfig The neuralControllerConfig_st structure used for iteration in the for loops
+ * @param control The structure for the input and input_old arrays
+ * @param weight The array for the weights
+ * @param neuron The array for the neuron_st neurons
+ */
 void neuralController_Free(neuralControllerConfig_st* ncConfig, control_st *control, double ***weight, neuron_st **neuron) {
     if((!weight) || (!neuron) || (!ncConfig))
         return;
@@ -230,6 +245,9 @@ void neuralController_Free(neuralControllerConfig_st* ncConfig, control_st *cont
     free(neuron);
 }
 
+/**
+ * @brief Currently unused
+ */
 void saveArrayToFile(const char *filename) {
     FILE *file = fopen(filename, "w");
     if (file == NULL) {
