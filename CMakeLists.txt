@@ -40,7 +40,7 @@ add_library(
     "${PROJECT_SOURCE_DIR}/lib/pbPlots/pbPlots.c"
     "${PROJECT_SOURCE_DIR}/lib/pbPlots/pbPlots.h"
     "${PROJECT_SOURCE_DIR}/lib/pbPlots/supportLib.c"
-    "${PROJECT_SOURCE_DIR}/lib/pbPlots/supportLib.c"
+    "${PROJECT_SOURCE_DIR}/lib/pbPlots/supportLib.h"
 )
 
 add_library(
@@ -64,10 +64,10 @@ set_target_properties(pthread PROPERTIES LINKER_LANGUAGE C)
 find_package(Python3 REQUIRED COMPONENTS Interpreter Development.Module)
 
 # create target library for python
-add_library(neuralControllerInterface MODULE ${neuralController} ${neuralControllerInterfaceSrc})
+Python3_add_library(neuralControllerInterface MODULE ${neuralController} ${neuralControllerInterfaceSrc})
 set_target_properties(neuralControllerInterface PROPERTIES
     PREFIX ""
-    SUFFIX ".cpython-314-x86_64-linux-gnu"
+    SUFFIX ".${Python3_SOABI}.so"
 )
 target_include_directories(neuralControllerInterface PRIVATE ${Python3_INCLUDE_DIRS})
 
