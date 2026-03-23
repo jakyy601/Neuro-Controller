@@ -32,11 +32,20 @@
             ]
         },
         {
-            "name": "Python: Test parameters for NC",
+            "name": "Python: Current File",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/test/testParameters.py",
-            "console": "integratedTerminal"
+            "program": "${workspaceFolder}/scripts/testNC.py",
+            "console": "integratedTerminal",
+            "stopOnEntry": true
+        },
+        {
+            "name": "Python C++ Debugger",
+            "type": "pythoncpp",
+            "request": "launch",
+            "pythonConfig": "custom",
+            "pythonLaunchName": "Python: Current File",
+            "cppConfig": "default (gdb) Attach"
         }
     ]
 }

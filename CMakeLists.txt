@@ -2,6 +2,11 @@ cmake_minimum_required(VERSION 3.18.4)
 
 project(Neural_Network)
 
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/scripts")
+set(CMAKE_C_FLAGS_DEBUG "-g -O0")
+set(CMAKE_C_FLAGS_RELEASE "-O2 -DNDEBUG")
+set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g")
+
 # project directories
 include_directories(
     ${CMAKE_SOURCE_DIR}/inc
