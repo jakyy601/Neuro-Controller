@@ -41,6 +41,8 @@ int neuralController_Init(neuralControllerConfig_st* ncConfig, control_st *contr
     // double *error_array = calloc(ncConfig->max_epochs, sizeof(double));
     ncConfig->arch.total_neurons = ncConfig->neurons * ncConfig->hidden_layers + ncConfig->output_layer_neurons;
     ncConfig->arch.total_weights = (ncConfig->inputs * ncConfig->neurons) + (ncConfig->neurons * ncConfig->neurons * (ncConfig->hidden_layers - 1)) + (ncConfig->neurons * ncConfig->output_layer_neurons);
+    printf("%d\n", ncConfig->arch.total_neurons);
+    printf("%d\n", ncConfig->arch.total_weights);
     ncConfig->arch.topology = (int *)calloc(ncConfig->layers, sizeof(int));
     for (int i = 0; i < ncConfig->layers; i++) {
         if (i == ncConfig->layers - 1) {
@@ -112,7 +114,7 @@ int neuralController_Init(neuralControllerConfig_st* ncConfig, control_st *contr
     
 #endif /*LOAD_weight*/
 
-    return 0;
+    return 42;
 }
 
 /**
@@ -212,7 +214,8 @@ int neuralController_Run(neuralControllerConfig_st* ncConfig, control_st *contro
     n = 0;
 
     *pOutput = neuron[ncConfig->hidden_layers][0].netoutput;
-    return 0;
+    printf("Output: %f\n", *pOutput);
+    return 3;
 }
 
 /**

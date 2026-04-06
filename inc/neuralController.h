@@ -21,9 +21,6 @@
 #define LOAD_WEIGHTS false
 
 typedef struct neuron {
-#ifdef PYTHON_EXPORT
-    PyObject_HEAD
-#endif
     double netinput;
     double netoutput;
     double bias;
@@ -31,18 +28,12 @@ typedef struct neuron {
 } neuron_st;
 
 typedef struct arch {
-#ifdef PYTHON_EXPORT
-    PyObject_HEAD
-#endif
     int *topology;
     int total_neurons;
     int total_weights;
 } arch_st;
 
 typedef struct neuralControllerConfig {
-#ifdef PYTHON_EXPORT
-    PyObject_HEAD
-#endif
     int hidden_layers;
     int layers;
     int neurons;
@@ -56,9 +47,6 @@ typedef struct neuralControllerConfig {
 } neuralControllerConfig_st;
 
 typedef struct control {
-#ifdef PYTHON_EXPORT
-    PyObject_HEAD
-#endif
     double act_old;
     double act_new;
     double rating;
@@ -67,9 +55,6 @@ typedef struct control {
 } control_st;
 
 typedef struct input {
-#ifdef PYTHON_EXPORT
-    PyObject_HEAD
-#endif
     double value;
     _Bool available;
 } input_st;

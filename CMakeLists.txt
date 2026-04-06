@@ -65,23 +65,15 @@ target_include_directories(
 target_link_libraries(pthread -lpthread m)
 set_target_properties(pthread PROPERTIES LINKER_LANGUAGE C)
 
-# find python installation for the neuralControllerInterface
-find_package(Python3 REQUIRED COMPONENTS Interpreter Development.Module)
-
 # create target library for python
-Python3_add_library(neuralControllerInterface MODULE ${neuralController} ${neuralControllerInterfaceSrc})
-set_target_properties(neuralControllerInterface PROPERTIES
-    PREFIX ""
-    SUFFIX ".${Python3_SOABI}.so"
-)
-target_include_directories(neuralControllerInterface PRIVATE ${Python3_INCLUDE_DIRS})
+add_library(neuralControllerInterface SHARED ${neuralController})
+set_target_properties(neuralControllerInterface PROPERTIES PREFIX "")
 
 # create target main
 add_executable(main ${main} ${neuralController})
 
 # link project libraries
 target_link_libraries(main PRIVATE pbPlots minIni pthread)
-target_link_libraries(neuralControllerInterface PRIVATE Python3::Module)
 
 #add_library(libNeuralController SHARED ${neuralController})
 #set_target_properties(libNeuralController PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
