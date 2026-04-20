@@ -149,6 +149,7 @@ int neuralController_Run(neuralControllerConfig_st* ncConfig, control_st *contro
                     sum += control->input[k] * weight[layer][k][j];
                 else
                     sum += neuron[layer - 1][k].netoutput * weight[layer][k][j];
+                printf("Sum: %f W: %f ", sum, weight[layer][k][j]);
             }
             neuron[layer][j].netinput = sum;
             if (layer == ncConfig->hidden_layers)
@@ -156,6 +157,7 @@ int neuralController_Run(neuralControllerConfig_st* ncConfig, control_st *contro
             else
                 neuron[layer][j].netoutput = tanh(sum);
             n++;
+            printf("Sum: %f N: %f \n", neuron[layer][j].netinput, neuron[layer][j].netoutput);
         }
     }
     assert(n == ncConfig->arch.total_neurons);
@@ -214,7 +216,6 @@ int neuralController_Run(neuralControllerConfig_st* ncConfig, control_st *contro
     n = 0;
 
     *pOutput = neuron[ncConfig->hidden_layers][0].netoutput;
-    printf("Output: %f\n", *pOutput);
     return 3;
 }
 
