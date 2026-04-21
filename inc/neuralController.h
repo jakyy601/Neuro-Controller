@@ -60,7 +60,7 @@ typedef struct input {
 } input_st;
 
 int neuralController_Init(neuralControllerConfig_st* ncConfig, control_st *control, float (*fctPtr)(), double**** pWeight, neuron_st*** pNeuron);
-int neuralController_Run(neuralControllerConfig_st* ncConfig, control_st *control, double* pOutput, float* pInput, double*** weight, neuron_st** neuron);
+int neuralController_Run(neuralControllerConfig_st* ncConfig, control_st *control, double* pOutput, double* pInput, double*** weight, neuron_st** neuron);
 void neuralController_Free(neuralControllerConfig_st* ncConfig, control_st *control, double ***weight, neuron_st **neuron);
 void saveArrayToFile(const char *filename);
 double dTanh(double x);

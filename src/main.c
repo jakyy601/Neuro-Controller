@@ -26,7 +26,7 @@ int main(int argc, const char* argv[]) {
     neuralControllerConfig_st ncConfig;
     float yn = 0;                   // state of plant
     double output = 0.0;            // neural Network output
-    float *input = NULL;
+    double *input = NULL;
 
     // end pointer for strtol
     char* end;
@@ -41,7 +41,7 @@ int main(int argc, const char* argv[]) {
     ncConfig.output_layer_neurons = (int)strtol(argv[6], &end, 10);
     ncConfig.setpoint = (float)roundf(strtof(argv[7], &end) * 100) / 100;
 
-    input = (float*)calloc(ncConfig.inputs, sizeof(float));
+    input = (double*)calloc(ncConfig.inputs, sizeof(float));
 
     // Neural Network
     double ***weight = NULL;

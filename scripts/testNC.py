@@ -7,6 +7,7 @@ def main():
     #looses the c pointer and therefore just frees the memory.
     neuralController = NeuralController()
     neuralController.run()
+    del neuralController
 
 if __name__ == "__main__":
     main()

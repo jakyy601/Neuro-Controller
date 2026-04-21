@@ -1,6 +1,8 @@
 import ctypes
 import random
 
+lib = ctypes.CDLL("./scripts/neuralControllerInterface.dll") 
+
 class arch_st(ctypes.Structure):
     _fields_ = [
         ("topology", ctypes.POINTER(ctypes.c_int)),
@@ -51,6 +53,32 @@ def i_plant(yn1: float, u: float) -> float:
     return yn1 + (K * u * T)
 
 class NeuralController:
+    lib.neuralController_Init.restype  = ctypes.c_int
+    lib.neuralController_Init.argtypes = [
+    ctypes.POINTER(neuralControllerConfig_st),                                          # ncConfig
+    ctypes.POINTER(control_st),                                                         # control
+    FCTPTR_TYPE,                                                                        # fctPtr
+    ctypes.POINTER(ctypes.POINTER(ctypes.POINTER(ctypes.POINTER(ctypes.c_double)))),    # pWeight
+    ctypes.POINTER(ctypes.POINTER(ctypes.POINTER(neuron_st))),                          # pNeuron
+    ]
+
+    lib.neuralController_Run.restype = ctypes.c_int
+    lib.neuralController_Run.argtypes = [
+        ctypes.POINTER(neuralControllerConfig_st),                                      # ncConfig
+        ctypes.POINTER(control_st),                                                     # control
+        ctypes.POINTER(ctypes.c_double),                                                # pOutput
+        ctypes.POINTER(ctypes.c_double),                                                 # pInput
+        ctypes.POINTER(ctypes.POINTER(ctypes.POINTER(ctypes.c_double))),                # weight
+        ctypes.POINTER(ctypes.POINTER(neuron_st)),                                      # neuron
+    ]
+
+    lib.neuralController_Free.argtypes = [
+        ctypes.POINTER(neuralControllerConfig_st),                                      # ncConfig
+        ctypes.POINTER(control_st),                                                     # control
+        ctypes.POINTER(ctypes.POINTER(ctypes.POINTER(ctypes.c_double))),                # weight
+        ctypes.POINTER(ctypes.POINTER(neuron_st)),                                      # neuron
+    ]
+
     def __init__(self):
         self.ncConfig = neuralControllerConfig_st(
             hidden_layers = 2,
@@ -72,36 +100,25 @@ class NeuralController:
         self.neuronPtr = ctypes.POINTER(ctypes.POINTER(neuron_st))
         self.neurons = self.neuronPtr()
 
-        self.lib = ctypes.CDLL("./scripts/neuralControllerInterface.dll") 
 
-        self.lib.neuralController_Init.restype  = ctypes.c_int
-        self.lib.neuralController_Init.argtypes = [
-        ctypes.POINTER(neuralControllerConfig_st),  # ncConfig
-        ctypes.POINTER(control_st),                 # control
-        FCTPTR_TYPE,                                # fctPtr
-        ctypes.POINTER(ctypes.POINTER(ctypes.POINTER(ctypes.POINTER(ctypes.c_double)))),  # pWeight
-        ctypes.POINTER(ctypes.POINTER(ctypes.POINTER(neuron_st))),                        # pNeuron
-        ]
-
-        self.result = self.lib.neuralController_Init(
+        self.result = lib.neuralController_Init(
         ctypes.byref(self.ncConfig),
         ctypes.byref(self.control),
         random_ctypes_float,
         ctypes.byref(self.weights),
         ctypes.byref(self.neurons),
         )
-        self.inputs = (ctypes.c_double * 2)()
         self.yn = (ctypes.c_double)()
         self.output = (ctypes.c_double)()
 
     def run(self):
         for i in range(self.ncConfig.max_epochs):
-            self.inputs[0] = self.yn
-            self.lib.neuralController_Run(ctypes.byref(self.ncConfig), ctypes.byref(self.control), ctypes.byref(self.output), ctypes.byref(self.inputs), self.weights, self.neurons)
+            self.control.input[0] = self.yn
+            lib.neuralController_Run(ctypes.byref(self.ncConfig), ctypes.byref(self.control), ctypes.byref(self.output), self.control.input, self.weights, self.neurons)
             self.yn.value = i_plant(self.yn.value, self.output.value)
-            if (i%1) == 0:
+            if (i%100) == 0:
                 print(f"Epoch: {i} Plant output: {self.yn.value} u: {self.output.value} Error: {self.ncConfig.setpoint - self.yn.value}")
 
     def __del__(self):
-        self.lib.neuralController_Free(ctypes.byref(self.ncConfig), ctypes.byref(self.control), self.weights, self.neurons)
+        lib.neuralController_Free(ctypes.byref(self.ncConfig), ctypes.byref(self.control), self.weights, self.neurons)
 
