@@ -47,11 +47,6 @@ FCTPTR_TYPE = ctypes.CFUNCTYPE(ctypes.c_float)
 def random_ctypes_float() -> float:
     return random.uniform(a=0.01, b=0.1)
 
-def i_plant(yn1: float, u: float) -> float:
-    K = 1.0
-    T = 0.1
-    return yn1 + (K * u * T)
-
 class NeuralController:
     lib.neuralController_Init.restype  = ctypes.c_int
     lib.neuralController_Init.argtypes = [
@@ -111,13 +106,10 @@ class NeuralController:
         self.yn = (ctypes.c_double)()
         self.output = (ctypes.c_double)()
 
-    def run(self):
-        for i in range(self.ncConfig.max_epochs):
-            self.control.input[0] = self.yn
-            lib.neuralController_Run(ctypes.byref(self.ncConfig), ctypes.byref(self.control), ctypes.byref(self.output), self.control.input, self.weights, self.neurons)
-            self.yn.value = i_plant(self.yn.value, self.output.value)
-            if (i%100) == 0:
-                print(f"Epoch: {i} Plant output: {self.yn.value} u: {self.output.value} Error: {self.ncConfig.setpoint - self.yn.value}")
+    def run(self, input: float) -> float:
+        self.control.input[0] = ctypes.c_double(input)
+        lib.neuralController_Run(ctypes.byref(self.ncConfig), ctypes.byref(self.control), ctypes.byref(self.output), self.control.input, self.weights, self.neurons)
+        return self.output.value
 
     def __del__(self):
         lib.neuralController_Free(ctypes.byref(self.ncConfig), ctypes.byref(self.control), self.weights, self.neurons)

@@ -1,5 +1,4 @@
 import numpy as np
-import zmq
 import struct
 
 Kp = 1.0
@@ -8,11 +7,6 @@ deltaT = 0.1
 y = [0]
 k = 0
 uk = 0
-
-#file = open("pt1.txt", "w")
-context = zmq.Context()
-socket = context.socket(zmq.REQ)
-socket.connect("tcp://localhost:5555")
 
 while(True):
     ykp1 = y[k] + (Kp * uk - y[k])*(deltaT/T1)
