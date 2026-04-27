@@ -1,7 +1,7 @@
 import ctypes
 import random
 
-lib = ctypes.CDLL("./scripts/neuralControllerInterface.dll") 
+lib = ctypes.CDLL("./scripts/neuralControllerInterface.so") 
 
 class arch_st(ctypes.Structure):
     _fields_ = [
@@ -62,7 +62,7 @@ class NeuralController:
         ctypes.POINTER(neuralControllerConfig_st),                                      # ncConfig
         ctypes.POINTER(control_st),                                                     # control
         ctypes.POINTER(ctypes.c_double),                                                # pOutput
-        ctypes.POINTER(ctypes.c_double),                                                 # pInput
+        ctypes.POINTER(ctypes.c_double),                                                # pInput
         ctypes.POINTER(ctypes.POINTER(ctypes.POINTER(ctypes.c_double))),                # weight
         ctypes.POINTER(ctypes.POINTER(neuron_st)),                                      # neuron
     ]
@@ -74,17 +74,17 @@ class NeuralController:
         ctypes.POINTER(ctypes.POINTER(neuron_st)),                                      # neuron
     ]
 
-    def __init__(self):
+    def __init__(self, hidden_layers: int, neurons: int, max_epochs: int, learning_rate: float, setpoint: float):
         self.ncConfig = neuralControllerConfig_st(
-            hidden_layers = 2,
-            layers = 4,
-            neurons = 8,
+            hidden_layers = hidden_layers,
+            layers = hidden_layers+2,
+            neurons = neurons,
             output_layer_neurons = 1,
             inputs = 2,
-            max_epochs = 5000,
+            max_epochs = max_epochs,
             initialized = 0,
-            learning_rate = 0.01,
-            setpoint = 1.0,
+            learning_rate = learning_rate,
+            setpoint = setpoint,
             arch = arch_st(),
         )
         self.control = control_st()

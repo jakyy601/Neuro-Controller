@@ -35,7 +35,7 @@
             "name": "Python: Current File",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/scripts/testNC.py",
+            "program": "${workspaceFolder}/scripts/main.py",
             "console": "integratedTerminal",
             "stopOnEntry": true
         },
