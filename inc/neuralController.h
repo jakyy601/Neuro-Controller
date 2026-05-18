@@ -41,13 +41,11 @@ typedef struct neuron {
  * @var topology                (Allocated) pointer to the topology of the neural network
  * @var total_neurons           Calculated value of all neurons, needed for sanity checks
  * @var total_weights           Calucalted value of all weights, needed for sanity checks
- * @var isJordan                Boolean value to loop back the outputs to the inputs
  */
 typedef struct arch {
     int *topology;
     int total_neurons;
     int total_weights;
-    _Bool isJordan;
 } arch_st;
 
 /**
@@ -62,6 +60,7 @@ typedef struct arch {
  * @var initialized             Signals the API that the neural network finished initialing
  * @var learning_rate           Learning rate of the neural network
  * @var setpoint                Setpoint of the controller
+ * @var isJordan                Boolean value to loop back the outputs to the inputs
  * @var arch                    Structure for the finished architecture of the network
  */
 typedef struct neuralControllerConfig {
@@ -74,6 +73,7 @@ typedef struct neuralControllerConfig {
     int initialized;
     double learning_rate;
     double setpoint;
+    _Bool isJordan;
     arch_st arch;
 } neuralControllerConfig_st;
 

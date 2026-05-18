@@ -17,7 +17,7 @@ int neuralController_Init(neuralControllerConfig_st* ncConfig, control_st *contr
     control->input_old = (double*)calloc(ncConfig->inputs, sizeof(double));
     control->rating = 0;
 
-    if(ncConfig->arch.isJordan){
+    if(ncConfig->isJordan){
         ncConfig->inputs += ncConfig->output_layer_neurons;
     }
 
@@ -110,7 +110,7 @@ int neuralController_Run(neuralControllerConfig_st* ncConfig, control_st *contro
     }
 
     /* Loop back output as input for Jordan network type */
-    if(ncConfig->arch.isJordan){
+    if(ncConfig->isJordan){
         control->input[ncConfig->inputs-1] = *pOutput;
     }
     /*Forward pass*/

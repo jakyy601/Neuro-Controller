@@ -21,6 +21,7 @@ class neuralControllerConfig_st(ctypes.Structure):
         ("initialized",          ctypes.c_int),
         ("learning_rate",        ctypes.c_double),
         ("setpoint",             ctypes.c_double),
+        ("isJordan",             ctypes.c_bool),
         ("arch",                 arch_st),
     ]
 
@@ -74,7 +75,7 @@ class NeuralController:
         ctypes.POINTER(ctypes.POINTER(neuron_st)),                                      # neuron
     ]
 
-    def __init__(self, hidden_layers: int, neurons: int, max_epochs: int, learning_rate: float, setpoint: float):
+    def __init__(self, hidden_layers: int, neurons: int, max_epochs: int, learning_rate: float, setpoint: float, isJordan: bool):
         self.ncConfig = neuralControllerConfig_st(
             hidden_layers = hidden_layers,
             layers = hidden_layers+2,
@@ -85,6 +86,7 @@ class NeuralController:
             initialized = 0,
             learning_rate = learning_rate,
             setpoint = setpoint,
+            isJordan = isJordan,
             arch = arch_st(),
         )
         self.control = control_st()
