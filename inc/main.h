@@ -2,9 +2,7 @@
 #define main_h
 
 #include "minIni.h"
-#include "pbPlots.h"
 #include "pthread.h"
-#include "supportLib.h"
 
 #include <errno.h>
 //#include <zmq.h>

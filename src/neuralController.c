@@ -10,27 +10,6 @@
  */
 #include "neuralController.h"
 
-/**
- * @brief Main loop for learning
- *
- * In the main learning loop, the neural network algorithm will learn to a specified
- * target and output that with the pointer ncOutput given in the function parameters.
- *
- * @param ncConfig Config for the neural network
- * @param ncOutput Output array
- * @return -
- */
-
-/**
- * @brief Initializes the neural controller
- * @details Parses the neuralControllConfig_st config and calculates the topology(layers + hidden layers) of the network, as well as
- *          the toal weights and neurons (these are used solely for debugging purposes). Then it allocates memory on the basis of the
- *          topology array and finally initializes the values of the weights and biases using the fctPtr function, which ideally should
- *          be a function generating values between 0 and 1.
- * @param ncConfig neuralControllerConfi_st structure
- * @param fctPtr Pointer to a function that generates values between 0 and 1
- * @return 0 on success
- */
 int neuralController_Init(neuralControllerConfig_st* ncConfig, control_st *control, float (*fctPtr)(), double**** pWeight, neuron_st*** pNeuron) {
     control->act_new = 0;
     control->act_old = ncConfig->setpoint - 0;
@@ -38,11 +17,14 @@ int neuralController_Init(neuralControllerConfig_st* ncConfig, control_st *contr
     control->input_old = (double*)calloc(ncConfig->inputs, sizeof(double));
     control->rating = 0;
 
+    if(ncConfig->arch.isJordan){
+        ncConfig->inputs += ncConfig->output_layer_neurons;
+    }
+
     // double *error_array = calloc(ncConfig->max_epochs, sizeof(double));
     ncConfig->arch.total_neurons = ncConfig->neurons * ncConfig->hidden_layers + ncConfig->output_layer_neurons;
     ncConfig->arch.total_weights = (ncConfig->inputs * ncConfig->neurons) + (ncConfig->neurons * ncConfig->neurons * (ncConfig->hidden_layers - 1)) + (ncConfig->neurons * ncConfig->output_layer_neurons);
-    printf("%d\n", ncConfig->arch.total_neurons);
-    printf("%d\n", ncConfig->arch.total_weights);
+
     ncConfig->arch.topology = (int *)calloc(ncConfig->layers, sizeof(int));
     for (int i = 0; i < ncConfig->layers; i++) {
         if (i == ncConfig->layers - 1) {
@@ -117,18 +99,6 @@ int neuralController_Init(neuralControllerConfig_st* ncConfig, control_st *contr
     return 42;
 }
 
-/**
- * @brief Iterates once through the forward and backwards pass.
- * @details Parses the input pointer, caluclates a forward pass, then caluclates values used for reinforcement learning and controlling parameters, 
- *          which are then written into the pOutput pointer, and finally calulates the backwards pass.
- * @param ncConfig neuralControllerConfig_st structure
- * @param control The control_st structure with the input and input_old arrays
- * @param pOutput Forward pass network output
- * @param pInput Forward pass network input
- * @param weight The array for the weights
- * @param neuron The neuron_st array
- * @return 0 on success
- */
 int neuralController_Run(neuralControllerConfig_st* ncConfig, control_st *control, double* pOutput, double* pInput, double*** weight, neuron_st** neuron) {
     int n = 0;
     int w = 0;
@@ -137,6 +107,11 @@ int neuralController_Run(neuralControllerConfig_st* ncConfig, control_st *contro
     control->input[0] = ncConfig->setpoint - pInput[0];
     for (int input_cnt = 0; input_cnt < ncConfig->inputs - 1; input_cnt++) {
         control->input[input_cnt + 1] = pInput[input_cnt];
+    }
+
+    /* Loop back output as input for Jordan network type */
+    if(ncConfig->arch.isJordan){
+        control->input[ncConfig->inputs-1] = *pOutput;
     }
     /*Forward pass*/
     for (int layer = 0; layer < ncConfig->layers - 1; layer++) {
@@ -219,14 +194,6 @@ int neuralController_Run(neuralControllerConfig_st* ncConfig, control_st *contro
     return 3;
 }
 
-/**
- * @brief Frees the allocated memory used for the neural controller.
- * @details Frees the allocated memory of the weights array, the neuron array, the input array, the input_old array and the topology array.
- * @param ncConfig The neuralControllerConfig_st structure used for iteration in the for loops
- * @param control The structure for the input and input_old arrays
- * @param weight The array for the weights
- * @param neuron The array for the neuron_st neurons
- */
 void neuralController_Free(neuralControllerConfig_st* ncConfig, control_st *control, double ***weight, neuron_st **neuron) {
     if((!weight) || (!neuron) || (!ncConfig))
         return;
@@ -249,9 +216,6 @@ void neuralController_Free(neuralControllerConfig_st* ncConfig, control_st *cont
     free(neuron);
 }
 
-/**
- * @brief Currently unused
- */
 void saveArrayToFile(const char *filename) {
     FILE *file = fopen(filename, "w");
     if (file == NULL) {
@@ -265,32 +229,13 @@ void saveArrayToFile(const char *filename) {
     fclose(file);
 }
 
-/**
- * @brief Sigmoid function
- *
- * @param x x value
- * @return y value
- */
 double sigmoid(double x) { return 1 / (1 + exp(-x)); }
 
-/**
- * @brief Derivative of the sigmoid function
- *
- *
- * @param x x value
- * @return y value
- */
 double dSigmoid(double x) {
     double s = sigmoid(x);
     return s * (1 - s);
 }
 
-/**
- * @brief C function for the hyberbolic tangent
- *
- * @param x x value for the dervative of the hyberbolic tangent
- * @return y value for the dervative of the hyberbolic tangent
- */
 double dTanh(double x) {
     double th = tanh(x);
     return 1.0 - th * th;

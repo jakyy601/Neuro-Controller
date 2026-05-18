@@ -40,6 +40,10 @@ int main(int argc, const char* argv[]) {
     ncConfig.neurons = (int)strtol(argv[5], &end, 10);
     ncConfig.output_layer_neurons = (int)strtol(argv[6], &end, 10);
     ncConfig.setpoint = (float)roundf(strtof(argv[7], &end) * 100) / 100;
+    long int temp = strtol(argv[10], &end, 10);
+    ncConfig.arch.isJordan = (_Bool)temp;
+
+    printf("Jordan Network: %d\n", ncConfig.arch.isJordan);
 
     input = (double*)calloc(ncConfig.inputs, sizeof(float));
 
