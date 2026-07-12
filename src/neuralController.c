@@ -117,8 +117,7 @@ int neuralController_Run(neuralControllerConfig_st* ncConfig, control_st *contro
     for (int layer = 0; layer < ncConfig->layers - 1; layer++) {
         for (int j = 0; j < ncConfig->arch.topology[layer + 1]; j++) {
             /*First hidden layer*/
-            // double sum = neuron[layer][j].bias;
-            double sum = 0.0;
+            double sum = neuron[layer][j].bias;
             for (int k = 0; k < ncConfig->arch.topology[layer]; k++) {
                 if (layer == 0)
                     sum += control->input[k] * weight[layer][k][j];
