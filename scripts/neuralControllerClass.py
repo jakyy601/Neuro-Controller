@@ -32,6 +32,7 @@ class control_st(ctypes.Structure):
         ("rating", ctypes.c_double),
         ("input", ctypes.POINTER(ctypes.c_double)),
         ("input_old", ctypes.POINTER(ctypes.c_double)),
+        ("epoch", ctypes.c_uint32),
     ]
 
 class neuron_st(ctypes.Structure):
@@ -90,6 +91,7 @@ class NeuralController:
             arch = arch_st(),
         )
         self.control = control_st()
+        self.control.epoch = 0
 
         self.weightPtr = ctypes.POINTER(ctypes.POINTER(ctypes.POINTER(ctypes.c_double)))
         self.weights = self.weightPtr()
@@ -108,8 +110,9 @@ class NeuralController:
         self.yn = (ctypes.c_double)()
         self.output = (ctypes.c_double)()
 
-    def run(self, input: float) -> float:
+    def run(self, input: float, learning_rate: float) -> float:
         self.control.input[0] = ctypes.c_double(input)
+        self.ncConfig.learning_rate = learning_rate
         lib.neuralController_Run(ctypes.byref(self.ncConfig), ctypes.byref(self.control), ctypes.byref(self.output), self.control.input, self.weights, self.neurons)
         return self.output.value
 

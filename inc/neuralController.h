@@ -85,6 +85,7 @@ typedef struct neuralControllerConfig {
  * @var rating                  Reinforcment learning variable that is injected into the backpropagation
  * @var input                   (Allocated) pointer to the inputs of the neural network
  * @var input_old               (Allocated) pointer to the previous inputs of the neural network
+ * @var epoch                   Current epoch
  */
 typedef struct control {
     double act_old;
@@ -92,6 +93,7 @@ typedef struct control {
     double rating;
     double *input;
     double *input_old;
+    unsigned int epoch;
 } control_st;
 
 /**

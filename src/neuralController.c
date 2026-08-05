@@ -188,6 +188,7 @@ int neuralController_Run(neuralControllerConfig_st* ncConfig, control_st *contro
     assert(n == ncConfig->arch.total_neurons);
     w = 0;
     n = 0;
+    control->epoch++;
 
     *pOutput = neuron[ncConfig->hidden_layers][0].netoutput;
     return 3;
