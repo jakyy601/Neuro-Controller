@@ -1,5 +1,6 @@
 import ctypes
 import random
+import numpy as np
 
 lib = ctypes.CDLL("./scripts/neuralControllerInterface.so") 
 
@@ -119,3 +120,4 @@ class NeuralController:
     def __del__(self):
         lib.neuralController_Free(ctypes.byref(self.ncConfig), ctypes.byref(self.control), self.weights, self.neurons)
 
+        
