@@ -8,49 +8,39 @@ set(CMAKE_C_FLAGS_DEBUG "-g -O0")
 set(CMAKE_C_FLAGS_RELEASE "-O2 -DNDEBUG")
 set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g")
 
-# set sources
-set(NeuralController_Sources
-    ${PROJECT_SOURCE_DIR}/src/neuralController.c
+# create STATIC library for every other target
+add_library(neuralController STATIC)
+target_sources(neuralController PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/neuralController.c
 )
-
-# set include directories
-set(Includes
-    ${PROJECT_SOURCE_DIR}/inc
+target_include_directories(neuralController PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/inc
 )
-
-add_library(neuralController STATIC
-    ${NeuralController_Sources}
-)
-
-target_include_directories(neuralController PRIVATE
-    ${Includes}
-)
-
-set(main_Sources
-    ${PROJECT_SOURCE_DIR}/src/main.c
-)
-
-add_library(minIni STATIC
-    ${PROJECT_SOURCE_DIR}/lib/minIni/minIni.c
-)
-
-target_include_directories(minIni PUBLIC
-    ${PROJECT_SOURCE_DIR}/lib/minIni
-)
-
-# add target main
-add_executable(main ${NeuralController_Sources} src/main.c)
-
-# add includes
-target_include_directories(main PRIVATE
-    ${Includes}
-)
-
-# link project libraries
-target_link_libraries(main PRIVATE minIni neuralController m)
 
 # create target library for python
-add_library(neuralControllerInterface SHARED ${NeuralController_Sources})
-target_include_directories(neuralControllerInterface PRIVATE ${Includes})
-target_link_libraries(neuralControllerInterface PRIVATE neuralController m)
+add_library(neuralControllerInterface SHARED)
+target_sources(neuralControllerInterface PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/neuralController.c
+)
+target_include_directories(neuralControllerInterface PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/inc
+)
+target_link_libraries(neuralControllerInterface PUBLIC 
+    m
+)
 set_target_properties(neuralControllerInterface PROPERTIES PREFIX "")
+
+# add target test
+add_executable(test)
+target_sources(test PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/main.c
+)
+target_include_directories(test PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/inc
+)
+target_link_libraries(test PRIVATE 
+    neuralController 
+    m
+)
+
+

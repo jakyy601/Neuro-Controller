@@ -1,10 +1,8 @@
 #ifndef main_h
 #define main_h
 
-#include "minIni.h"
-#include "pthread.h"
-
 #include <errno.h>
+#include <time.h>
 //#include <zmq.h>
 
 #include "neuralController.h"
