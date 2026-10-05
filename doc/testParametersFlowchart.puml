@@ -1,0 +1,23 @@
+@startuml
+skinparam shadowing false
+start
+:Start script;
+:Define range of values
+for parameter under test;
+:Set runs per parameter value (N);
+:Call testParameters();
+
+while (Untested parameter values remain?) is (yes)
+  :Select next parameter value;
+  :Initialize run counter to 0;
+  while (Run counter < N?) is (yes)
+    :Execute one test run;
+    :Save run data and returned metrics;
+    :Increment run counter;
+  endwhile (no)
+endwhile (no)
+
+:Return saved data from testParameters();
+:Plot results in main;
+stop
+@enduml

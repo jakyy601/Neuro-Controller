@@ -1,0 +1,15 @@
+@startuml
+class NeuralController {
+  +__init__(...) : None
+  +run(...) : float
+  +__del__() : None
+}
+
+class "C neural-controller API" as C_API <<C library>> {
+  +neuralController_Init(...) : int
+  +neuralController_Run(...) : int
+  +neuralController_Free(...) : void
+}
+
+NeuralController ..> C_API : wraps
+@enduml

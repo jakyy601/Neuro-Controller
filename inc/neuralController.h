@@ -18,8 +18,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "activation.h"
+
 #define LOAD_WEIGHTS false
 
+/**************************************************************************************************
+                             Section for public type definitions
+***************************************************************************************************/
 /**
  * @struct neuron_st
  * @brief Neuron for a feedforward network
@@ -36,6 +41,17 @@ typedef struct neuron {
 } neuron_st;
 
 /**
+ * @struct layer_st
+ * @brief Description of one layer
+ * @var neurons Amount of neurons in the layer
+ * @var activation Activation function used in that layer
+ */
+typedef struct layer {
+    int neurons;
+    const activation_st* activation;
+}layer_st;
+
+/**
  * @struct arch_st
  * @brief Architecture of the neural network
  * @var topology                (Allocated) pointer to the topology of the neural network
@@ -43,7 +59,7 @@ typedef struct neuron {
  * @var total_weights           Calucalted value of all weights, needed for sanity checks
  */
 typedef struct arch {
-    int *topology;
+    layer_st* topology;
     int total_neurons;
     int total_weights;
 } arch_st;
@@ -69,11 +85,12 @@ typedef struct neuralControllerConfig {
     int neurons;
     int output_layer_neurons;
     int inputs;
-    int max_epochs;
     int initialized;
     double learning_rate;
     double setpoint;
     _Bool isJordan;
+    activation_type_en activation_hidden;
+    activation_type_en activation_output;
     arch_st arch;
 } neuralControllerConfig_st;
 
@@ -106,6 +123,10 @@ typedef struct input {
     double value;
     _Bool available;
 } input_st;
+
+/**************************************************************************************************
+                        Section for public function prototypes
+***************************************************************************************************/
 
 /**
  * @brief Initializes the neural controller

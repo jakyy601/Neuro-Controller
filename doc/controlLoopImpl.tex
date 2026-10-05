@@ -1,0 +1,24 @@
+\begin{tikzpicture}[
+    >=Stealth,
+    line width=0.7pt,
+    font=\small,
+    block/.style={draw,rounded corners=2pt,minimum width=2.45cm,minimum height=1.05cm,align=center},
+    arrow/.style={->,shorten >=1pt},
+    node distance=0.9cm
+]
+
+\node[block] (controller) {Neural\\controller};
+\node[block,right=3.55cm of controller] (limit) {Output limitation\\and scaling};
+\node[block,right=2.26cm of limit,minimum width=1.3cm] (dac) {DAC};
+\node[block,right=3.44cm of dac] (plant) {RCC plant};
+\node[block,below=1.8cm of plant,minimum width=1.3cm] (adc) {ADC};
+\node[block,left=2.31cm of adc] (inputscale) {Input scaling};
+
+\draw[arrow] (controller.east) -- node[above] {Digital command output} (limit.west);
+\draw[arrow] (limit.east) -- node[above] {DAC command} (dac.west);
+\draw[arrow] (dac.east) -- node[above=0pt] {Analog plant input $u[k]$} (plant.west);
+\draw[arrow] (plant.south) -- node[right] {Analog plant output $y[k]$} (adc.north);
+\draw[arrow] (adc.west) -- node[above] {ADC reading} (inputscale.east);
+\draw[arrow] (inputscale.west) -| node[below,pos=0.25] {Scaled feedback} (controller.south);
+
+\end{tikzpicture}

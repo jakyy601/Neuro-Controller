@@ -4,9 +4,23 @@ import numpy as np
 
 lib = ctypes.CDLL("./scripts/neuralControllerInterface.so") 
 
+activation_st = ctypes.c_void_p
+
+class activation_type_en(ctypes.c_int):
+    ACTIVATION_SIGMOID    = 0
+    ACTIVATION_TANH       = 1
+    ACTIVATION_LEAKY_RELU = 2
+    ACTIVATION_LINEAR     = 3
+
+class layer_st(ctypes.Structure):
+    _fields_ = [
+        ("neurons", ctypes.c_int),
+        ("activation", activation_st),  # const activation_st*
+    ]
+
 class arch_st(ctypes.Structure):
     _fields_ = [
-        ("topology", ctypes.POINTER(ctypes.c_int)),
+        ("topology", ctypes.POINTER(layer_st)),
         ("total_neurons", ctypes.c_int),
         ("total_weights", ctypes.c_int),
     ]
@@ -18,11 +32,12 @@ class neuralControllerConfig_st(ctypes.Structure):
         ("neurons",              ctypes.c_int),
         ("output_layer_neurons", ctypes.c_int),
         ("inputs",               ctypes.c_int),
-        ("max_epochs",           ctypes.c_int),
         ("initialized",          ctypes.c_int),
         ("learning_rate",        ctypes.c_double),
         ("setpoint",             ctypes.c_double),
         ("isJordan",             ctypes.c_bool),
+        ("activation_hidden",    activation_type_en),
+        ("activation_output",    activation_type_en),
         ("arch",                 arch_st),
     ]
 
@@ -77,16 +92,16 @@ class NeuralController:
         ctypes.POINTER(ctypes.POINTER(neuron_st)),                                      # neuron
     ]
 
-    def __init__(self, hidden_layers: int, neurons: int, max_epochs: int, learning_rate: float, setpoint: float, isJordan: bool):
+    def __init__(self, hidden_layers: int, neurons: int, learning_rate: float, setpoint: float, isJordan: bool):
         self.ncConfig = neuralControllerConfig_st(
             hidden_layers = hidden_layers,
             layers = hidden_layers+2,
             neurons = neurons,
             output_layer_neurons = 1,
             inputs = 2,
-            max_epochs = max_epochs,
             initialized = 0,
-            #learning_rate = learning_rate,
+            activation_hidden = activation_type_en.ACTIVATION_TANH,
+            activation_output = activation_type_en.ACTIVATION_LINEAR,
             setpoint = setpoint,
             isJordan = isJordan,
             arch = arch_st(),

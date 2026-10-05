@@ -12,6 +12,7 @@ set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g")
 add_library(neuralController STATIC)
 target_sources(neuralController PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/neuralController.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/activation.c
 )
 target_include_directories(neuralController PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/inc
@@ -34,6 +35,7 @@ elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "([xX]86|AMD64|amd64)")
     add_library(neuralControllerInterface SHARED)
     target_sources(neuralControllerInterface PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src/neuralController.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/activation.c
     )
     target_include_directories(neuralControllerInterface PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/inc

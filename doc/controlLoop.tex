@@ -1,0 +1,47 @@
+\begin{tikzpicture}[
+    >=Stealth,
+    line width=0.7pt,
+    font=\small,
+    block/.style={draw,rounded corners=2pt,minimum width=2.65cm,minimum height=1.25cm,align=center},
+    signal/.style={->,shorten >=1pt},
+    sum/.style={draw,circle,minimum size=0.65cm,inner sep=0pt},
+    every node/.style={font=\small}
+]
+
+\node[sum] (compare) at (0,0) {$\Sigma$};
+\node[block] (controller) at (3.1,0) {Neural\\controller};
+\node[block] (element) at (6.9,0) {Control element};
+\node[sum] (disturbancesum) at (9.6,0) {$\Sigma$};
+\node[block] (plant) at (12.0,0) {PT$n$ plant};
+\node[block] (sensor) at (6.9,-3.37) {Sensor};
+
+% Forward path
+\draw[signal] ($(compare.west)+(-2.0,0)$) --
+    node[above,near start] {$r[k]$}
+    node[above,pos=0.93] {$+$} (compare.west);
+\draw[signal] (compare.east) --
+    node[above] {$e[k]$} (controller.west);
+\draw[signal] (controller.east) --
+    node[above,align=center] {$u_c[k]$} (element.west);
+\draw[signal] (element.east) --
+    node[above] {$u[k]$}
+    node[above,pos=0.94] {$+$} (disturbancesum.west);
+\draw[signal] (disturbancesum.east) -- (plant.west);
+\draw[signal] (plant.east) -- ++(1.8,0)
+    node[above,pos=0.75] {$y[k]$};
+
+% Disturbance applied at plant input
+\draw[signal] ($(disturbancesum.north)+(0,1.3)$) --
+    node[right=1pt, pos=0.43] {$d[k]$}
+    node[right,pos=0.92] {$+$} (disturbancesum.north);
+
+% Feedback path
+\coordinate (tap) at ($(plant.east)+(0.95,0)$);
+\fill (tap) circle (1.2pt);
+\draw[signal] (tap) |- (sensor.east);
+\draw[signal] (sensor.west) -| ($(compare.south)+(0,-3.0)$) --
+    node[right,pos=0.92] {$-$} (compare.south);
+\node[above] at ($(sensor.west)!0.5!($(compare.south)+(0,-3.0)$)$)
+    {$y_m[k]$};
+
+\end{tikzpicture}

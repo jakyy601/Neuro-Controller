@@ -9,6 +9,7 @@
  *
  */
 #include "main.h"
+#include "activation.h"
 
 pthread_t feedInputThread;
 pthread_mutex_t mutex;
@@ -36,10 +37,12 @@ int main(int argc, const char* argv[]) {
     ncConfig.hidden_layers = (int)strtol(argv[2], &end, 10);
     ncConfig.layers = ncConfig.hidden_layers + 2;
     ncConfig.learning_rate = (float)roundf(strtof(argv[3], &end) * 100) / 100;
-    ncConfig.max_epochs = (int)strtol(argv[4], &end, 10);
+    unsigned int max_epochs = (int)strtol(argv[4], &end, 10);
     ncConfig.neurons = (int)strtol(argv[5], &end, 10);
     ncConfig.output_layer_neurons = (int)strtol(argv[6], &end, 10);
     ncConfig.setpoint = (float)roundf(strtof(argv[7], &end) * 100) / 100;
+    ncConfig.activation_hidden = ACTIVATION_TANH;
+    ncConfig.activation_output = ACTIVATION_LINEAR;
     long int temp = strtol(argv[8], &end, 10);
     ncConfig.isJordan = (_Bool)temp;
 
@@ -53,8 +56,8 @@ int main(int argc, const char* argv[]) {
     control_st control = {0};
 
     // array for all error values over n epochs
-    float* error_array = (float*)calloc(ncConfig.max_epochs, sizeof(float));
-    int* x_values = (int*)calloc(ncConfig.max_epochs, sizeof(int));
+    float* error_array = (float*)calloc(max_epochs, sizeof(float));
+    int* x_values = (int*)calloc(max_epochs, sizeof(int));
 
     // set seed for rand() function
     srand(time(NULL));
@@ -67,7 +70,7 @@ int main(int argc, const char* argv[]) {
     neuralController_Init(&ncConfig, &control, randFctPtr, &weight, &neuron);
 
     // Loop for testing over n epochs
-    for (int i = 0; i < ncConfig.max_epochs; i++) {
+    for (int i = 0; i < max_epochs; i++) {
         // set input for the next run
         input[0] = yn;
         // Run through feed forward + backpropagation
@@ -83,7 +86,7 @@ int main(int argc, const char* argv[]) {
         if ((i % 100) == 0) {
             printf("Epoch: %d Plant output: %f Error: %f u: %f \n", i, yn, ncConfig.setpoint - yn, output);
         }
-        if(i == (ncConfig.max_epochs/2)){
+        if(i == (max_epochs/2)){
             ncConfig.setpoint = ncConfig.setpoint/2;
         }
     }

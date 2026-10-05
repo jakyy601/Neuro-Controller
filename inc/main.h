@@ -6,6 +6,7 @@
 //#include <zmq.h>
 
 #include "neuralController.h"
+#include "activation.h"
 
 #define PlotGraph false
 #define WriteToFile false

@@ -1,0 +1,39 @@
+\begin{tikzpicture}[
+  >=Stealth,
+  line width=0.65pt,
+  node distance=0.65cm,
+  every node/.style={font=\small},
+  terminal/.style={draw,ellipse,minimum width=3.3cm,minimum height=0.85cm,align=center},
+  process/.style={draw,rounded corners=3pt,minimum width=4.5cm,minimum height=0.85cm,align=center},
+  decision/.style={draw,diamond,aspect=2.1,inner sep=1pt,minimum width=3.2cm,minimum height=1.05cm,align=center},
+  arrow/.style={->}
+]
+\node[terminal] (start) {Start script / main};
+\node[process,below=of start] (range) {Define parameter values to test};
+\node[process,below=of range] (runs) {Set number of runs per value $N$};
+\node[process,below=of runs] (call) {Call \texttt{testParameters()}};
+\node[decision,below=0.85cm of call] (values) {Untested values remain?};
+\node[process,below=0.9cm of values] (select) {Select next value; set counter $i=0$};
+\node[decision,below=0.85cm of select] (count) {$i<N$?};
+\node[process,below=0.9cm of count] (test) {Execute one test run};
+\node[process,below=of test] (save) {Save run data and return metrics};
+\node[process,below=of save] (increment) {Increment counter $i$};
+\node[process,right=2.06cm of values] (return) {Return saved data};
+\node[process,below=of return] (plot) {Plot results in main};
+\node[terminal,below=of plot] (end) {End};
+
+\draw[arrow] (start) -- (range);
+\draw[arrow] (range) -- (runs);
+\draw[arrow] (runs) -- (call);
+\draw[arrow] (call) -- (values);
+\draw[arrow] (values) -- node[left] {yes} (select);
+\draw[arrow] (select) -- (count);
+\draw[arrow] (count) -- node[left] {yes} (test);
+\draw[arrow] (test) -- (save);
+\draw[arrow] (save) -- (increment);
+\draw[arrow] (increment.east) -- ++(1.02,0) |- (count.east);
+\draw[arrow] (count.west) -- ++(-1.61,0) node[above,pos=0.25] {no} |- (values.west);
+\draw[arrow] (values.east) -- node[above] {no} (return.west);
+\draw[arrow] (return) -- (plot);
+\draw[arrow] (plot) -- (end);
+\end{tikzpicture}
