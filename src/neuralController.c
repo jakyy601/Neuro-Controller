@@ -91,12 +91,15 @@ int neuralController_Init(neuralControllerConfig_st* ncConfig, control_st *contr
     ncConfig->arch.topology = (layer_st *)calloc(ncConfig->layers, sizeof(layer_st));
     for (int i = 0; i < ncConfig->layers; i++) {
         if (i == ncConfig->layers - 1) {
+            /** Output layer */
             ncConfig->arch.topology[i].neurons = ncConfig->output_layer_neurons;
             ncConfig->arch.topology[i].activation = act_output;
         } else if (i == 0) {
+            /** Input layer, no activation */
             ncConfig->arch.topology[i].neurons = ncConfig->inputs;
             ncConfig->arch.topology[i].activation = act_hidden;
         } else {
+            /** Hidden layer */
             ncConfig->arch.topology[i].neurons = ncConfig->neurons;
             ncConfig->arch.topology[i].activation = act_hidden;
         }
@@ -232,7 +235,7 @@ static void forwardPass(neuralControllerConfig_st* ncConfig, control_st *control
                     sum += neuron[layer - 1][k].netoutput * weight[layer][k][j];
             }
             neuron[layer][j].netinput = sum;
-            neuron[layer][j].netoutput = ncConfig->arch.topology[layer].activation->forward(sum);
+            neuron[layer][j].netoutput = ncConfig->arch.topology[layer+1].activation->forward(sum);
             n++;
         }
     }
