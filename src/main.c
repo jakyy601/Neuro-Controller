@@ -10,10 +10,11 @@
  */
 #include "main.h"
 #include "activation.h"
+#include "pt2.h"
 
 pthread_t feedInputThread;
 pthread_mutex_t mutex;
-
+static PT2_Handle_t pt2;
 /**
  * @brief main loop for testing
  *
@@ -42,7 +43,7 @@ int main(int argc, const char* argv[]) {
     ncConfig.output_layer_neurons = (int)strtol(argv[6], &end, 10);
     ncConfig.setpoint = (float)roundf(strtof(argv[7], &end) * 100) / 100;
     ncConfig.activation_hidden = ACTIVATION_TANH;
-    ncConfig.activation_output = ACTIVATION_LINEAR;
+    ncConfig.activation_output = ACTIVATION_TANH;
     long int temp = strtol(argv[8], &end, 10);
     ncConfig.isJordan = (_Bool)temp;
 
@@ -69,6 +70,8 @@ int main(int argc, const char* argv[]) {
     // Initialize the neuralController
     neuralController_Init(&ncConfig, &control, randFctPtr, &weight, &neuron);
 
+    PT2_Init(&pt2, 0.001f);
+
     // Loop for testing over n epochs
     for (int i = 0; i < max_epochs; i++) {
         // set input for the next run
@@ -76,7 +79,8 @@ int main(int argc, const char* argv[]) {
         // Run through feed forward + backpropagation
         neuralController_Run(&ncConfig, &control, &output, input, weight, neuron);
         /*Calculate next state of the I plant*/
-        yn = i_plant(yn, output);
+        // yn = i_plant(yn, output);
+        yn = PT2_Update(&pt2, output);
         // save error
         // error_array[i] = (double)ncConfig.setpoint - yn;
         error_array[i] = yn;
@@ -86,9 +90,11 @@ int main(int argc, const char* argv[]) {
         if ((i % 100) == 0) {
             printf("Epoch: %d Plant output: %f Error: %f u: %f \n", i, yn, ncConfig.setpoint - yn, output);
         }
-        if(i == (max_epochs/2)){
-            ncConfig.setpoint = ncConfig.setpoint/2;
-        }
+        if(i > 4000)
+            ncConfig.learning_rate = 0.001;
+        // if(i == (max_epochs/2)){
+        //     ncConfig.setpoint = ncConfig.setpoint/2;
+        // }
     }
 
 #if PlotGraph

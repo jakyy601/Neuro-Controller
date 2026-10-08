@@ -22,6 +22,7 @@ if(TEST)
     add_executable(test)
     target_sources(test PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src/main.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/pt2.c
     )
     target_include_directories(test PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/inc
