@@ -92,7 +92,16 @@ class NeuralController:
         ctypes.POINTER(ctypes.POINTER(neuron_st)),                                      # neuron
     ]
 
-    def __init__(self, hidden_layers: int, neurons: int, learning_rate: float, setpoint: float, isJordan: bool):
+    def __init__(
+        self,
+        hidden_layers: int,
+        neurons: int,
+        learning_rate: float,
+        setpoint: float,
+        isJordan: bool,
+        activation_hidden=activation_type_en.ACTIVATION_TANH,
+        activation_output=activation_type_en.ACTIVATION_LINEAR,
+    ):
         self.ncConfig = neuralControllerConfig_st(
             hidden_layers = hidden_layers,
             layers = hidden_layers+2,
@@ -100,8 +109,8 @@ class NeuralController:
             output_layer_neurons = 1,
             inputs = 2,
             initialized = 0,
-            activation_hidden = activation_type_en.ACTIVATION_TANH,
-            activation_output = activation_type_en.ACTIVATION_LINEAR,
+            activation_hidden = activation_hidden,
+            activation_output = activation_output,
             setpoint = setpoint,
             isJordan = isJordan,
             arch = arch_st(),

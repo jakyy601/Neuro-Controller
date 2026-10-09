@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import learnrate as lr
 from matplotlib import colormaps
-from neuralControllerClass import NeuralController
+from neuralControllerClass import NeuralController, activation_type_en
 from system import I, PT2
 
 def calculate_metrics(
@@ -116,13 +116,9 @@ def min_max_normalize(series):
     return (series - minimum) / (maximum - minimum)
 
 def calculate_average_metrics(metrics_df):
-    """
-    Average already calculated metrics for each p2 value.
-    """
-
     return (
         metrics_df
-        .groupby("p2", as_index=False)
+        .groupby("activation", as_index=False)
         .agg(
             ise_mean=("ise", "mean"),
             final_value_mean=("final_value", "mean"),
@@ -142,56 +138,63 @@ def calculate_average_metrics(metrics_df):
     )
 
 def run_experiments(
-    p2_values,
+    activation_tests,
     repetitions,
     test_parameters,
-    simulation_steps=6000,
+    hidden_layers=1,
+    neurons=16,
+    simulation_steps=10000,
     initial_learning_rate=0.01,
-    setpoint=1.0,
+    setpoint=0.5,
     option=True,
 ):
-    """
-    Execute all experiments and return plot data and metric results.
-    """
-
     colors = colormaps["viridis"](
-        np.linspace(0.1, 0.9, len(p2_values))
+        np.linspace(
+            0.1,
+            0.9,
+            len(activation_tests),
+        )
     )
 
     experiment_data = []
     metric_results = []
 
-    for p2, color in zip(p2_values, colors):
+    for test, color in zip(activation_tests, colors):
+        name, activation_hidden, activation_output = test
         runs = []
 
         for _ in range(repetitions):
             data = test_parameters(
-                hidden_layers=1,
-                neurons=p2,
+                hidden_layers=hidden_layers,
+                neurons=neurons,
                 max_epochs=simulation_steps,
                 learning_rate=initial_learning_rate,
                 setpoint=setpoint,
                 isJordan=option,
+                activation_hidden=activation_hidden,
+                activation_output=activation_output,
             )
+
             runs.append(data)
 
         experiment_data.append({
-            "p2": p2,
+            "name": name,
+            "activation_hidden": activation_hidden,
+            "activation_output": activation_output,
             "color": color,
             "runs": runs,
         })
 
-        # Calculate metrics for every individual repetition
         for repetition, run in enumerate(runs, start=1):
-            metrics = calculate_metrics(
+            run_metrics = calculate_metrics(
                 run,
                 setpoint=setpoint,
             )
 
             metric_results.append({
-                "p2": p2,
+                "activation": name,
                 "repetition": repetition,
-                **metrics,
+                **run_metrics,
             })
 
     metrics_df = pd.DataFrame(metric_results)
@@ -201,7 +204,7 @@ def run_experiments(
 def create_short_test_report(average_metrics):
     lines = [
         ";".join([
-            "Neurons",
+            "Activation",
             "ISE mean",
             "Final value mean",
             "Maximum overshoot mean",
@@ -212,7 +215,7 @@ def create_short_test_report(average_metrics):
 
     for _, row in average_metrics.iterrows():
         lines.append(";".join([
-            f"{row['p2']:.0f}",
+            str(row["activation"]),
             f"{row['ise_mean']:.6g}",
             f"{row['final_value_mean']:.6f}",
             f"{row['max_overshoot_mean']:.6f}",
@@ -229,6 +232,8 @@ def testParameters(
     learning_rate: float,
     setpoint: float,
     isJordan: bool,
+    activation_hidden,
+    activation_output,
 ):
     dt = 0.001
 
@@ -243,16 +248,21 @@ def testParameters(
         dt=dt,
     )
 
+    if activation_hidden == activation_type_en.ACTIVATION_LEAKY_RELU:
+        learning_rate = learning_rate / 10
+
     step_size = 2000
     gamma = 0.1
     min_learning_rate = learning_rate * gamma
 
     neuralController = NeuralController(
-        hidden_layers,
-        neurons,
-        learning_rate,
-        setpoint,
-        isJordan,
+        hidden_layers=hidden_layers,
+        neurons=neurons,
+        learning_rate=learning_rate,
+        setpoint=setpoint,
+        isJordan=isJordan,
+        activation_hidden=activation_hidden,
+        activation_output=activation_output,
     )
 
     for i in range(max_epochs - 1):

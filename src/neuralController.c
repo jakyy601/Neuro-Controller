@@ -69,7 +69,7 @@ int neuralController_Init(neuralControllerConfig_st* ncConfig, control_st *contr
     }
 
     /** Check if activation function pointers exist */
-    if((ncConfig->activation_hidden == 0) || (ncConfig->activation_output == 0)){
+    if((ncConfig->activation_hidden > 3) || (ncConfig->activation_output > 3)){
         return -1;
     }
 

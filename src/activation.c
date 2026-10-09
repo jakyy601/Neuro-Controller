@@ -84,12 +84,12 @@ static double dTanh(double x) {
 }
 
 static double leakyRelu(double x) {
-    static const double alpha = 0.01;
+    static const double alpha = 0.3;
     return x > 0.0 ? x : alpha * x;
 }
 
 static double dLeakyRelu(double x) {
-    static const double alpha = 0.01;
+    static const double alpha = 0.3;
     return x > 0.0 ? 1.0 : alpha;
 }
 

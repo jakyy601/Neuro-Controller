@@ -1,5 +1,5 @@
 import gc
-from neuralControllerClass import NeuralController
+from neuralControllerClass import (NeuralController, activation_type_en)
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import colormaps
@@ -11,17 +11,52 @@ import metrics
 def main():
     gc.disable()
 
-    p2_values = list(range(4, 17))
+    p2_values = list(range(15, 16))
     repetitions = 10
     setpoint = 0.5
 
+    activation_tests = [
+    (
+        "tanh_linear",
+        activation_type_en.ACTIVATION_TANH,
+        activation_type_en.ACTIVATION_LINEAR,
+    ),
+    (
+        "tanh_tanh",
+        activation_type_en.ACTIVATION_TANH,
+        activation_type_en.ACTIVATION_TANH,
+    ),
+    (
+        "relu_linear",
+        activation_type_en.ACTIVATION_LEAKY_RELU,
+        activation_type_en.ACTIVATION_LINEAR,
+    ),
+    (
+        "relu_tanh",
+        activation_type_en.ACTIVATION_LEAKY_RELU,
+        activation_type_en.ACTIVATION_TANH,
+    ),
+    (
+        "sigmoid_linear",
+        activation_type_en.ACTIVATION_SIGMOID,
+        activation_type_en.ACTIVATION_LINEAR,
+    ),
+    (
+        "sigmoid_tanh",
+        activation_type_en.ACTIVATION_SIGMOID,
+        activation_type_en.ACTIVATION_TANH,
+    ),
+]
+
     experiment_data, metrics_df = metrics.run_experiments(
-        p2_values=p2_values,
-        repetitions=repetitions,
+        activation_tests=activation_tests,
+        repetitions=10,
         test_parameters=metrics.testParameters,
+        hidden_layers=1,
+        neurons=16,
         simulation_steps=10000,
         initial_learning_rate=0.01,
-        setpoint=setpoint,
+        setpoint=0.5,
         option=True,
     )
 

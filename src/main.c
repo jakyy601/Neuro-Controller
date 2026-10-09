@@ -42,7 +42,7 @@ int main(int argc, const char* argv[]) {
     ncConfig.neurons = (int)strtol(argv[5], &end, 10);
     ncConfig.output_layer_neurons = (int)strtol(argv[6], &end, 10);
     ncConfig.setpoint = (float)roundf(strtof(argv[7], &end) * 100) / 100;
-    ncConfig.activation_hidden = ACTIVATION_TANH;
+    ncConfig.activation_hidden = ACTIVATION_LEAKY_RELU;
     ncConfig.activation_output = ACTIVATION_TANH;
     long int temp = strtol(argv[8], &end, 10);
     ncConfig.isJordan = (_Bool)temp;
