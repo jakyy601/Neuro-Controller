@@ -11,7 +11,7 @@ import metrics
 def main():
     gc.disable()
 
-    p2_values = list(range(4, 17))
+    p2_values = list(range(0, 3))
     repetitions = 10
     setpoint = 0.5
 

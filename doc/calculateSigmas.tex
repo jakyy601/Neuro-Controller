@@ -8,20 +8,19 @@
     arrow/.style={->}
 ]
 
-\node[terminator] (start) at (-0.01,0.54) {Start};
-\node[process,below=0.8cm of start] (error) {Calculate error signal};
+\node[terminator] (start) at (-0.01,0.55) {Start};
+\node[process,below=2.53cm of start] (error) {Calculate error signal};
 \node[decision,below=0.8cm of error] (output) {Output layer?};
 \node[process,below left=0.9cm and 2.5cm of output] (outdelta)
     {Calculate output-layer\\$\sigma$ using tracking error};
 \node[process,below right=0.9cm and 2.5cm of output] (hiddendelta)
     {Calculate hidden-layer\\$\sigma$ using next-layer $\sigma$};
 \coordinate (merge) at ($(outdelta.south)!0.5!(hiddendelta.south)+(0,-0.65cm)$);
-\node[process,below=0.45cm of merge] (save) at (0,-6.49) {Save layer $\sigma$ values};
+\node[process,below=0.45cm of merge] (save) at (-0.01,-7.83) {Save layer $\sigma$ values};
 \node[decision,below=0.8cm of save] (first) {First hidden layer?};
-\node[process,right=4.5cm of first] (previous) {Previous layer};
+\node[process,right=4.5cm of first] (previous) {Decrement layer counter};
 \node[terminator,below=0.85cm of first] (end) {End};
 
-\draw[arrow] (start) -- (error);
 \draw[arrow] (error) -- (output);
 \draw[arrow] (output.west) -| node[above,pos=0.25] {true} (outdelta.north);
 \draw[arrow] (output.east) -| node[above,pos=0.25] {false} (hiddendelta.north);
@@ -32,4 +31,8 @@
 \draw[arrow] (first.east) -- node[above] {false} (previous.west);
 \draw[arrow] (previous.north) |- (error.east);
 
+
+  \node[process,below=0.81cm of start] (error2) at (0.25,-0.25) {Layer counter = output layer};
+  \draw[->] (start.south) -- (error2.north);
+  \draw[->] (error2.south) -- (error.north);
 \end{tikzpicture}

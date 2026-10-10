@@ -15,6 +15,20 @@
 pthread_t feedInputThread;
 pthread_mutex_t mutex;
 static PT2_Handle_t pt2;
+
+/**
+ * @brief Generates a random float between 0 and 0.1
+ *
+ *
+ * @param
+ * @return
+ */
+float generateRandomFloat(void);
+
+float generateRandomFloatWithLimit(float limit);
+
+float generateXavierFloat(float fanIn, float fanOut);
+
 /**
  * @brief main loop for testing
  *
@@ -56,16 +70,12 @@ int main(int argc, const char* argv[]) {
     neuron_st **neuron = NULL; 
     control_st control = {0};
 
-    // array for all error values over n epochs
-    float* error_array = (float*)calloc(max_epochs, sizeof(float));
-    int* x_values = (int*)calloc(max_epochs, sizeof(int));
-
     // set seed for rand() function
     srand(time(NULL));
 
     // function pointer to a function that generates random floats
-    float (*randFctPtr)();
-    randFctPtr = &generateRandomInt;
+    float (*randFctPtr)(float, float);
+    randFctPtr = &generateXavierFloat;
 
     // Initialize the neuralController
     neuralController_Init(&ncConfig, &control, randFctPtr, &weight, &neuron);
@@ -81,11 +91,6 @@ int main(int argc, const char* argv[]) {
         /*Calculate next state of the I plant*/
         // yn = i_plant(yn, output);
         yn = PT2_Update(&pt2, output);
-        // save error
-        // error_array[i] = (double)ncConfig.setpoint - yn;
-        error_array[i] = yn;
-        // save epoch
-        x_values[i] = i;
         // debug print message
         if ((i % 100) == 0) {
             printf("Epoch: %d Plant output: %f Error: %f u: %f \n", i, yn, ncConfig.setpoint - yn, output);
@@ -135,26 +140,11 @@ int main(int argc, const char* argv[]) {
 
     //Write weights to file
     //saveArrayToFile("test.bin");
-
-    // free allocated memory
-    free(error_array);
-    free(x_values);
     free(input);
 
     neuralController_Free(&ncConfig, &control, weight, neuron);
 
     return 42;
-}
-
-/**
- * @brief Generates a random float between 0 and 0.1
- *
- *
- * @param
- * @return
- */
-float generateRandomInt(void) {
-    return (rand() / (double)(RAND_MAX)) / 10;
 }
 
 /**
@@ -175,4 +165,20 @@ float i_plant(float yn, float u) {
 double round_to_decimal_places(float value, int decimal_places) {
     double factor = pow(10, decimal_places);
     return round(value * factor) / factor;
+}
+
+
+float generateRandomFloat(void){
+    return (rand() / (double)(RAND_MAX)) / 10;
+}
+
+float generateRandomFloatWithLimit(float limit) {
+    float rnd = (float)rand() / (float)RAND_MAX;
+    return (2.0f * rnd - 1.0f) * limit;
+}
+
+float generateXavierFloat(float fanIn, float fanOut){
+    static float gain = 0.1;
+    float limit = gain * sqrt(6.0f / (fanIn + fanOut));
+    return generateRandomFloatWithLimit(limit);
 }

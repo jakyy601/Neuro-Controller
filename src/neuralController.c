@@ -58,7 +58,7 @@ static const activation_st *get_activation(activation_type_en id);
 /**************************************************************************************************
                                 Section for public functions
 ***************************************************************************************************/
-int neuralController_Init(neuralControllerConfig_st* ncConfig, control_st *control, float (*fctPtr)(), double**** pWeight, neuron_st*** pNeuron) {
+int neuralController_Init(neuralControllerConfig_st* ncConfig, control_st *control, float (*fctPtr)(float, float), double**** pWeight, neuron_st*** pNeuron) {
     /** Null pointer check */
     if((!ncConfig) || (!control) || (!fctPtr) || (!pWeight) || (!pNeuron)){
         return -1;
@@ -125,7 +125,7 @@ int neuralController_Init(neuralControllerConfig_st* ncConfig, control_st *contr
     for (int layer = 0; layer < ncConfig->layers; layer++) {
         for (int j = 0; j < ncConfig->arch.topology[layer]; j++) {
             /*Initialize bias and everything else in the neuron struct*/
-            neuron[layer][j].bias = (double)(*fctPtr)();
+            neuron[layer][j].bias = 0;
             neuron[layer][j].netinput = 0.0;
             neuron[layer][j].netoutput = 0.0;
             neuron[layer][j].sigma = 0.0;
@@ -143,7 +143,7 @@ int neuralController_Init(neuralControllerConfig_st* ncConfig, control_st *contr
         for (int j = 0; j < ncConfig->arch.topology[layer].neurons; j++) {
             weight[layer][j] = (double *)calloc(ncConfig->arch.topology[layer + 1].neurons, sizeof(double));
             for (int k = 0; k < ncConfig->arch.topology[layer + 1].neurons; k++) {
-                weight[layer][j][k] = (double)(*fctPtr)();
+                weight[layer][j][k] = (double)(*fctPtr)(ncConfig->arch.topology[layer].neurons, ncConfig->arch.topology[layer+1].neurons);
             }
         }
     }
@@ -153,7 +153,11 @@ int neuralController_Init(neuralControllerConfig_st* ncConfig, control_st *contr
         neuron[layer - 1] = (neuron_st *)calloc(ncConfig->arch.topology[layer].neurons, sizeof(neuron_st));
         for (int j = 0; j < ncConfig->arch.topology[layer].neurons; j++) {
             /*Initialize bias and everything else in the neuron struct*/
-            neuron[layer - 1][j].bias = (double)(*fctPtr)();
+            if(layer == ncConfig->layers-1){
+                neuron[layer - 1][j].bias = 0.5;
+            }else{
+                neuron[layer - 1][j].bias = 0.0;
+            }
             neuron[layer - 1][j].netinput = 0.0;
             neuron[layer - 1][j].netoutput = 0.0;
             neuron[layer - 1][j].sigma = 0.0;

@@ -141,7 +141,7 @@ typedef struct input {
  * @param pneuron Reference pointer to a 2-dimensional neuron_st array
  * @return 0 on success
  */
-int neuralController_Init(neuralControllerConfig_st* ncConfig, control_st *control, float (*fctPtr)(), double**** pWeight, neuron_st*** pNeuron);
+int neuralController_Init(neuralControllerConfig_st* ncConfig, control_st *control, float (*fctPtr)(float, float), double**** pWeight, neuron_st*** pNeuron);
 
 /**
  * @brief Iterates once through the forward and backwards pass.

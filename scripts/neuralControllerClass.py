@@ -59,11 +59,22 @@ class neuron_st(ctypes.Structure):
         ("sigma", ctypes.c_double),
     ]
 
-FCTPTR_TYPE = ctypes.CFUNCTYPE(ctypes.c_float)
+# FCTPTR_TYPE = ctypes.CFUNCTYPE(ctypes.c_float)
+
+FCTPTR_TYPE = ctypes.CFUNCTYPE(
+    ctypes.c_float,  # return type: float
+    ctypes.c_float,  # first argument: float
+    ctypes.c_float,  # second argument: float
+)
 
 @FCTPTR_TYPE
-def random_ctypes_float() -> float:
+def random_ctypes_float(fanIn: float, fanOut: float) -> float:
     return random.uniform(a=0.01, b=0.1)
+
+@FCTPTR_TYPE
+def xavier_ctypes_float(fanIn: float, fanOut: float) -> float:
+    limit = 0.4 * (6.0 / (fanIn + fanOut)) ** 0.5
+    return random.uniform(-limit, limit)
 
 class NeuralController:
     lib.neuralController_Init.restype  = ctypes.c_int
@@ -119,7 +130,7 @@ class NeuralController:
         self.result = lib.neuralController_Init(
         ctypes.byref(self.ncConfig),
         ctypes.byref(self.control),
-        random_ctypes_float,
+        xavier_ctypes_float,
         ctypes.byref(self.weights),
         ctypes.byref(self.neurons),
         )

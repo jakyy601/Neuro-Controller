@@ -167,9 +167,10 @@ def run_experiments(
         for _ in range(repetitions):
             data = test_parameters(
                 hidden_layers=1,
-                neurons=p2,
+                neurons=16,
                 max_epochs=simulation_steps,
                 learning_rate=initial_learning_rate,
+                learning_rate_method=0,
                 setpoint=setpoint,
                 isJordan=option,
             )
@@ -227,6 +228,7 @@ def testParameters(
     neurons: int,
     max_epochs: int,
     learning_rate: float,
+    learning_rate_method: int,
     setpoint: float,
     isJordan: bool,
 ):
@@ -243,9 +245,12 @@ def testParameters(
         dt=dt,
     )
 
-    step_size = 2000
+    step_size = max_epochs // 8
+    step_size_ld = max_epochs // 5
     gamma = 0.1
     min_learning_rate = learning_rate * gamma
+    final_learning_rate = min_learning_rate
+    reference_error = abs(setpoint)
 
     neuralController = NeuralController(
         hidden_layers,
@@ -256,17 +261,41 @@ def testParameters(
     )
 
     for i in range(max_epochs - 1):
-        learning_rate_rel = lr.step_decay_lr(
-            i,
-            learning_rate,
-            step_size,
-            gamma,
-        )
+        if learning_rate_method == 0:
+            learning_rate_rel = lr.step_decay_lr(
+                i,
+                learning_rate,
+                step_size,
+                gamma,
+            )
 
-        learning_rate_rel = max(
-            min_learning_rate,
-            learning_rate_rel,
-        )
+            learning_rate_rel = max(
+                min_learning_rate,
+                learning_rate_rel,
+            )
+
+        elif learning_rate_method == 1:
+            learning_rate_rel = lr.linear_decay_lr(
+                i,
+                learning_rate * 0.7,
+                final_learning_rate * 0.1,
+                step_size_ld,
+            )
+
+        elif learning_rate_method == 2:
+            error = abs(setpoint - y[i])
+
+            learning_rate_rel = lr.error_dependent_lr(
+                error,
+                min_learning_rate,
+                0.3*learning_rate,
+                reference_error,
+            )
+
+        else:
+            raise ValueError(
+                "learning_rate_method must be 0, 1, or 2"
+            )
 
         u[i + 1] = neuralController.run(
             y[i],
