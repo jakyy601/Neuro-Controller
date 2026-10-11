@@ -1,6 +1,7 @@
 import ctypes
 import random
-import numpy as np
+import math
+from enum import IntEnum
 
 lib = ctypes.CDLL("./scripts/neuralControllerInterface.so") 
 
@@ -73,17 +74,35 @@ def random_ctypes_float(fanIn: float, fanOut: float) -> float:
 
 @FCTPTR_TYPE
 def xavier_ctypes_float(fanIn: float, fanOut: float) -> float:
-    limit = 0.4 * (6.0 / (fanIn + fanOut)) ** 0.5
+    scale = 0.2
+    limit = scale * (6.0 / (fanIn + fanOut)) ** 0.5
     return random.uniform(-limit, limit)
+
+@FCTPTR_TYPE
+def gauss_ctypes_float(fanIn: float, fanOut: float) -> float:
+    scale = 0.2
+    stddev = scale / math.sqrt(fanIn)
+    return random.gauss(mu=0.0, sigma=stddev)
+
+class InitMethod(IntEnum):
+    RANDOM = 0
+    GAUSS = 1
+    XAVIER = 2
+
+INIT_METHODS = {
+    InitMethod.RANDOM: random_ctypes_float,
+    InitMethod.GAUSS: gauss_ctypes_float,
+    InitMethod.XAVIER: xavier_ctypes_float,
+}
 
 class NeuralController:
     lib.neuralController_Init.restype  = ctypes.c_int
     lib.neuralController_Init.argtypes = [
-    ctypes.POINTER(neuralControllerConfig_st),                                          # ncConfig
-    ctypes.POINTER(control_st),                                                         # control
-    FCTPTR_TYPE,                                                                        # fctPtr
-    ctypes.POINTER(ctypes.POINTER(ctypes.POINTER(ctypes.POINTER(ctypes.c_double)))),    # pWeight
-    ctypes.POINTER(ctypes.POINTER(ctypes.POINTER(neuron_st))),                          # pNeuron
+        ctypes.POINTER(neuralControllerConfig_st),                                          # ncConfig
+        ctypes.POINTER(control_st),                                                         # control
+        FCTPTR_TYPE,                                                                        # fctPtr
+        ctypes.POINTER(ctypes.POINTER(ctypes.POINTER(ctypes.POINTER(ctypes.c_double)))),    # pWeight
+        ctypes.POINTER(ctypes.POINTER(ctypes.POINTER(neuron_st))),                          # pNeuron
     ]
 
     lib.neuralController_Run.restype = ctypes.c_int
@@ -103,7 +122,7 @@ class NeuralController:
         ctypes.POINTER(ctypes.POINTER(neuron_st)),                                      # neuron
     ]
 
-    def __init__(self, hidden_layers: int, neurons: int, learning_rate: float, setpoint: float, isJordan: bool):
+    def __init__(self, hidden_layers: int, neurons: int, setpoint: float, isJordan: bool, init_method: int):
         self.ncConfig = neuralControllerConfig_st(
             hidden_layers = hidden_layers,
             layers = hidden_layers+2,
@@ -126,11 +145,10 @@ class NeuralController:
         self.neuronPtr = ctypes.POINTER(ctypes.POINTER(neuron_st))
         self.neurons = self.neuronPtr()
 
-
         self.result = lib.neuralController_Init(
         ctypes.byref(self.ncConfig),
         ctypes.byref(self.control),
-        xavier_ctypes_float,
+        INIT_METHODS[init_method],
         ctypes.byref(self.weights),
         ctypes.byref(self.neurons),
         )
@@ -147,5 +165,3 @@ class NeuralController:
 
     def __del__(self):
         lib.neuralController_Free(ctypes.byref(self.ncConfig), ctypes.byref(self.control), self.weights, self.neurons)
-
-        

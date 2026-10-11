@@ -146,7 +146,7 @@ def run_experiments(
     repetitions,
     test_parameters,
     simulation_steps=6000,
-    initial_learning_rate=0.01,
+    initial_learning_rate=0.1,
     setpoint=1.0,
     option=True,
 ):
@@ -173,6 +173,7 @@ def run_experiments(
                 learning_rate_method=0,
                 setpoint=setpoint,
                 isJordan=option,
+                initMethod=p2
             )
             runs.append(data)
 
@@ -231,6 +232,7 @@ def testParameters(
     learning_rate_method: int,
     setpoint: float,
     isJordan: bool,
+    initMethod: int
 ):
     dt = 0.001
 
@@ -245,20 +247,20 @@ def testParameters(
         dt=dt,
     )
 
+    neuralController = NeuralController(
+        hidden_layers,
+        neurons,
+        setpoint,
+        isJordan,
+        initMethod,
+    )
+
     step_size = max_epochs // 8
     step_size_ld = max_epochs // 5
     gamma = 0.1
     min_learning_rate = learning_rate * gamma
     final_learning_rate = min_learning_rate
     reference_error = abs(setpoint)
-
-    neuralController = NeuralController(
-        hidden_layers,
-        neurons,
-        learning_rate,
-        setpoint,
-        isJordan,
-    )
 
     for i in range(max_epochs - 1):
         if learning_rate_method == 0:

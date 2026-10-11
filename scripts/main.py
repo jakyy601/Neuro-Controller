@@ -41,7 +41,7 @@ def main():
         average_metrics
     )
 
-    print("\nTab-separated test report:")
+    print("\ntest report:")
     print(report)
 
     plt.show()
