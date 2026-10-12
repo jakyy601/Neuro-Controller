@@ -70,7 +70,7 @@ static float dLinear(float x);
                                 Section for static functions
 ***************************************************************************************************/
 static float sigmoid(float x) {
-    return 1 / (1 + exp(-x)); 
+    return 1 / (1 + expf(-x)); 
 }
 
 static float dSigmoid(float x) {
@@ -79,7 +79,7 @@ static float dSigmoid(float x) {
 }
 
 static float dTanh(float x) {
-    float th = tanh(x);
+    float th = tanhf(x);
     return 1.0 - th * th;
 }
 

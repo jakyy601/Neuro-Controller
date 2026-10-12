@@ -13,6 +13,8 @@ add_library(neuralController STATIC)
 target_sources(neuralController PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/neuralController.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/activation.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/pt2.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/pid.c
 )
 target_include_directories(neuralController PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/inc

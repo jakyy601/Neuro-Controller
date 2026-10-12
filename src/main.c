@@ -163,7 +163,7 @@ float i_plant(float yn, float u) {
 }
 
 float round_to_decimal_places(float value, int decimal_places) {
-    float factor = pow(10, decimal_places);
+    float factor = powf(10, decimal_places);
     return round(value * factor) / factor;
 }
 
@@ -179,6 +179,6 @@ float generateRandomFloatWithLimit(float limit) {
 
 float generateXavierFloat(float fanIn, float fanOut){
     static float gain = 0.1;
-    float limit = gain * sqrt(6.0f / (fanIn + fanOut));
+    float limit = gain * sqrtf(6.0f / (fanIn + fanOut));
     return generateRandomFloatWithLimit(limit);
 }

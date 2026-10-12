@@ -55,6 +55,8 @@ static void updateWeightsAndBiases(neuralControllerConfig_st* ncConfig, control_
  */
 static const activation_st *get_activation(activation_type_en id);
 
+static inline float clampf(float value, float min, float max);
+
 /**************************************************************************************************
                                 Section for public functions
 ***************************************************************************************************/
@@ -321,6 +323,12 @@ static void updateWeightsAndBiases(neuralControllerConfig_st* ncConfig, control_
     assert(n == ncConfig->arch.total_neurons);
 }
 
+float stepDecayLr(int epoch, float initialLr, int stepSize, float gamma) {
+    int decay_steps = epoch / stepSize;
+    float learningRateRel = initialLr * powf(gamma, (float)decay_steps);
+    return clampf(learningRateRel, initialLr*gamma, initialLr);
+}
+
 void saveArrayToFile(const char *filename) {
     FILE *file = fopen(filename, "w");
     if (file == NULL) {
@@ -339,4 +347,17 @@ static const activation_st *get_activation(activation_type_en id) {
         case ACTIVATION_LINEAR:     return &ACT_LINEAR;
         default:                    return &ACT_LINEAR; // or handle error
     }
+}
+
+static inline float clampf(float value, float min, float max)
+{
+    if (value < min) {
+        return min;
+    }
+
+    if (value > max) {
+        return max;
+    }
+
+    return value;
 }
