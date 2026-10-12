@@ -1,10 +1,7 @@
 import gc
 from neuralControllerClass import NeuralController
-import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import colormaps
-from system import PT1, PT2, I
-import learnrate as lr
 import plot
 import metrics
 

@@ -41,8 +41,8 @@ int main(int argc, const char* argv[]) {
     // create the neural controller config
     neuralControllerConfig_st ncConfig;
     float yn = 0;                   // state of plant
-    double output = 0.0;            // neural Network output
-    double *input = NULL;
+    float output = 0.0;            // neural Network output
+    float *input = NULL;
 
     // end pointer for strtol
     char* end;
@@ -63,10 +63,10 @@ int main(int argc, const char* argv[]) {
 
     printf("Jordan Network: %d\n", ncConfig.isJordan);
 
-    input = (double*)calloc(ncConfig.inputs, sizeof(float));
+    input = (float*)calloc(ncConfig.inputs, sizeof(float));
 
     // Neural Network
-    double ***weight = NULL;
+    float ***weight = NULL;
     neuron_st **neuron = NULL; 
     control_st control = {0};
 
@@ -111,7 +111,7 @@ int main(int argc, const char* argv[]) {
 
     // Create PNG file and free allocations
     size_t length;
-    double* pngData = ConvertToPNG(&length, imageRef->image);
+    float* pngData = ConvertToPNG(&length, imageRef->image);
     WriteToFile(pngData, length, "control.png");
     DeleteImage(imageRef->image);
     FreeAllocations();
@@ -162,14 +162,14 @@ float i_plant(float yn, float u) {
     return yn + K * u * T;
 }
 
-double round_to_decimal_places(float value, int decimal_places) {
-    double factor = pow(10, decimal_places);
+float round_to_decimal_places(float value, int decimal_places) {
+    float factor = pow(10, decimal_places);
     return round(value * factor) / factor;
 }
 
 
 float generateRandomFloat(void){
-    return (rand() / (double)(RAND_MAX)) / 10;
+    return (rand() / (float)(RAND_MAX)) / 10;
 }
 
 float generateRandomFloatWithLimit(float limit) {

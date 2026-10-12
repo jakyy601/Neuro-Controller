@@ -34,8 +34,8 @@ class neuralControllerConfig_st(ctypes.Structure):
         ("output_layer_neurons", ctypes.c_int),
         ("inputs",               ctypes.c_int),
         ("initialized",          ctypes.c_int),
-        ("learning_rate",        ctypes.c_double),
-        ("setpoint",             ctypes.c_double),
+        ("learning_rate",        ctypes.c_float),
+        ("setpoint",             ctypes.c_float),
         ("isJordan",             ctypes.c_bool),
         ("activation_hidden",    activation_type_en),
         ("activation_output",    activation_type_en),
@@ -44,20 +44,20 @@ class neuralControllerConfig_st(ctypes.Structure):
 
 class control_st(ctypes.Structure):
     _fields_ = [
-        ("act_old", ctypes.c_double),
-        ("act_new", ctypes.c_double),
-        ("rating", ctypes.c_double),
-        ("input", ctypes.POINTER(ctypes.c_double)),
-        ("input_old", ctypes.POINTER(ctypes.c_double)),
+        ("act_old", ctypes.c_float),
+        ("act_new", ctypes.c_float),
+        ("rating", ctypes.c_float),
+        ("input", ctypes.POINTER(ctypes.c_float)),
+        ("input_old", ctypes.POINTER(ctypes.c_float)),
         ("epoch", ctypes.c_uint32),
     ]
 
 class neuron_st(ctypes.Structure):
     _fields_ = [
-        ("netinput", ctypes.c_double),
-        ("netoutput", ctypes.c_double),
-        ("bias", ctypes.c_double),
-        ("sigma", ctypes.c_double),
+        ("netinput", ctypes.c_float),
+        ("netoutput", ctypes.c_float),
+        ("bias", ctypes.c_float),
+        ("sigma", ctypes.c_float),
     ]
 
 # FCTPTR_TYPE = ctypes.CFUNCTYPE(ctypes.c_float)
@@ -101,7 +101,7 @@ class NeuralController:
         ctypes.POINTER(neuralControllerConfig_st),                                          # ncConfig
         ctypes.POINTER(control_st),                                                         # control
         FCTPTR_TYPE,                                                                        # fctPtr
-        ctypes.POINTER(ctypes.POINTER(ctypes.POINTER(ctypes.POINTER(ctypes.c_double)))),    # pWeight
+        ctypes.POINTER(ctypes.POINTER(ctypes.POINTER(ctypes.POINTER(ctypes.c_float)))),    # pWeight
         ctypes.POINTER(ctypes.POINTER(ctypes.POINTER(neuron_st))),                          # pNeuron
     ]
 
@@ -109,16 +109,16 @@ class NeuralController:
     lib.neuralController_Run.argtypes = [
         ctypes.POINTER(neuralControllerConfig_st),                                      # ncConfig
         ctypes.POINTER(control_st),                                                     # control
-        ctypes.POINTER(ctypes.c_double),                                                # pOutput
-        ctypes.POINTER(ctypes.c_double),                                                # pInput
-        ctypes.POINTER(ctypes.POINTER(ctypes.POINTER(ctypes.c_double))),                # weight
+        ctypes.POINTER(ctypes.c_float),                                                # pOutput
+        ctypes.POINTER(ctypes.c_float),                                                # pInput
+        ctypes.POINTER(ctypes.POINTER(ctypes.POINTER(ctypes.c_float))),                # weight
         ctypes.POINTER(ctypes.POINTER(neuron_st)),                                      # neuron
     ]
 
     lib.neuralController_Free.argtypes = [
         ctypes.POINTER(neuralControllerConfig_st),                                      # ncConfig
         ctypes.POINTER(control_st),                                                     # control
-        ctypes.POINTER(ctypes.POINTER(ctypes.POINTER(ctypes.c_double))),                # weight
+        ctypes.POINTER(ctypes.POINTER(ctypes.POINTER(ctypes.c_float))),                # weight
         ctypes.POINTER(ctypes.POINTER(neuron_st)),                                      # neuron
     ]
 
@@ -139,7 +139,7 @@ class NeuralController:
         self.control = control_st()
         self.control.epoch = 0
 
-        self.weightPtr = ctypes.POINTER(ctypes.POINTER(ctypes.POINTER(ctypes.c_double)))
+        self.weightPtr = ctypes.POINTER(ctypes.POINTER(ctypes.POINTER(ctypes.c_float)))
         self.weights = self.weightPtr()
 
         self.neuronPtr = ctypes.POINTER(ctypes.POINTER(neuron_st))
@@ -152,12 +152,12 @@ class NeuralController:
         ctypes.byref(self.weights),
         ctypes.byref(self.neurons),
         )
-        self.yn = (ctypes.c_double)()
-        self.output = (ctypes.c_double)()
+        self.yn = (ctypes.c_float)()
+        self.output = (ctypes.c_float)()
 
     def run(self, input: float, learning_rate: float, setpoint: float) -> float:
-        # self.control.input[0] = ctypes.c_double(input)
-        nnInput = ctypes.c_double(float(input))
+        # self.control.input[0] = ctypes.c_float(input)
+        nnInput = ctypes.c_float(float(input))
         self.ncConfig.learning_rate = learning_rate
         self.ncConfig.setpoint = setpoint
         lib.neuralController_Run(ctypes.byref(self.ncConfig), ctypes.byref(self.control), ctypes.byref(self.output), ctypes.byref(nnInput), self.weights, self.neurons)

@@ -3,7 +3,8 @@ import pandas as pd
 import learnrate as lr
 from matplotlib import colormaps
 from neuralControllerClass import NeuralController
-from system import I, PT2
+#from system import I, PT2
+from pt2_rk4 import PT2
 
 def calculate_metrics(
     data,

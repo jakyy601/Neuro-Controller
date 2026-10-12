@@ -18,7 +18,7 @@ typedef struct i2 {
 
 float generateRandomInt(void);
 float i_plant(float yn, float u);
-double round_to_decimal_places(float value, int decimal_places);
+float round_to_decimal_places(float value, int decimal_places);
 
 static const char inifile[] = "F:/work/Neuro-Controller/cfg/config.ini";
 
