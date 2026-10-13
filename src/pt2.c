@@ -10,12 +10,6 @@ static PT2_State_t PT2_Derivative(const PT2_Handle_t *h,
                                   float u)
 {
     PT2_State_t dx;
-
-    /*
-     * T²*y'' + 2*D*T*y' + y = K*u
-     *
-     * y'' = (K*u - 2*D*T*y' - y) / T²
-     */
     dx.y = x.dy;
 
     dx.dy = (h->K * u

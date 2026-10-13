@@ -172,4 +172,10 @@ void neuralController_Free(neuralControllerConfig_st* ncConfig, control_st *cont
  */
 void saveArrayToFile(const char *filename);
 
+/**
+ * @brief 
+ * 
+ */
+float stepDecayLr(int epoch, float initialLr, int stepSize, float gamma);
+
 #endif  /* neuralController */
