@@ -9,6 +9,7 @@ def main():
     gc.disable()
 
     p2_values = list(range(0, 3))
+    # p2_values = [True, False]
     repetitions = 10
     setpoint = 0.5
 

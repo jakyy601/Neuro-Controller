@@ -80,9 +80,9 @@ def xavier_ctypes_float(fanIn: float, fanOut: float) -> float:
 
 @FCTPTR_TYPE
 def gauss_ctypes_float(fanIn: float, fanOut: float) -> float:
-    scale = 0.2
+    scale = 0.1
     stddev = scale / math.sqrt(fanIn)
-    return random.gauss(mu=0.0, sigma=stddev)
+    return random.gauss(mu=0.0, sigma=0.1)
 
 class InitMethod(IntEnum):
     RANDOM = 0

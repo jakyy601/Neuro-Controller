@@ -24,12 +24,12 @@
 \draw[arrow] (error) -- (output);
 \draw[arrow] (output.west) -| node[above,pos=0.25] {true} (outdelta.north);
 \draw[arrow] (output.east) -| node[above,pos=0.25] {false} (hiddendelta.north);
-\draw[arrow] (outdelta.south) |- (save.west);
-\draw[arrow] (hiddendelta.south) |- (save.east);
+\draw[arrow] (outdelta.south) |- (-1.8,-8.29);
+\draw[arrow] (hiddendelta.south) |- (1.8,-8.3);
 \draw[arrow] (save) -- (first);
 \draw[arrow] (first) -- node[left] {true} (end);
-\draw[arrow] (first.east) -- node[above] {false} (previous.west);
-\draw[arrow] (previous.north) |- (error.east);
+\draw[arrow] (first.east) -- node[above] {false} (6.34,-10.42);
+\draw[arrow] (previous.north) |- (1.78,-2.9);
 
 
   \node[process,below=0.81cm of start] (error2) at (0.25,-0.25) {Layer counter = output layer};

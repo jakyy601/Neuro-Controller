@@ -146,9 +146,9 @@ def run_experiments(
     p2_values,
     repetitions,
     test_parameters,
-    simulation_steps=6000,
-    initial_learning_rate=0.1,
-    setpoint=1.0,
+    simulation_steps,
+    initial_learning_rate,
+    setpoint,
     option=True,
 ):
     """
