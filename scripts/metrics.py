@@ -118,7 +118,7 @@ def min_max_normalize(series):
 
 def calculate_average_metrics(metrics_df):
     """
-    Average already calculated metrics for each p2 value.
+    Calculate mean and variance for each p2 value.
     """
 
     return (
@@ -126,18 +126,39 @@ def calculate_average_metrics(metrics_df):
         .groupby("p2", as_index=False)
         .agg(
             ise_mean=("ise", "mean"),
+            ise_variance=("ise", "var"),
+
             final_value_mean=("final_value", "mean"),
+            final_value_variance=(
+                "final_value",
+                "var",
+            ),
+
             max_overshoot_mean=(
                 "max_overshoot",
                 "mean",
             ),
+            max_overshoot_variance=(
+                "max_overshoot",
+                "var",
+            ),
+
             overshoot_percent_mean=(
                 "overshoot_percent",
                 "mean",
             ),
+            overshoot_percent_variance=(
+                "overshoot_percent",
+                "var",
+            ),
+
             settling_time_mean=(
                 "settling_time",
                 "mean",
+            ),
+            settling_time_variance=(
+                "settling_time",
+                "var",
             ),
         )
     )
@@ -174,9 +195,14 @@ def run_experiments(
                 learning_rate_method=0,
                 setpoint=setpoint,
                 isJordan=option,
-                initMethod=p2
+                initMethod=1
             )
             runs.append(data)
+
+        calculate_and_export_average_run(
+        runs=runs,
+        filename=f"average_run_p2_{p2:.0f}.csv",
+        )
 
         experiment_data.append({
             "p2": p2,
@@ -201,15 +227,81 @@ def run_experiments(
 
     return experiment_data, metrics_df
 
+def calculate_and_export_average_run(
+    runs,
+    filename="average_run.csv",
+):
+    """
+    Calculate the average run from multiple repetitions
+    and export it as a CSV file with columns t,y.
+    """
+
+    if len(runs) == 0:
+        raise ValueError(
+            "At least one run is required."
+        )
+
+    runs = [
+        np.asarray(run, dtype=float)
+        for run in runs
+    ]
+
+    first_run = runs[0]
+
+    if first_run.ndim != 2 or first_run.shape[1] < 2:
+        raise ValueError(
+            "Each run must be a 2-D array with "
+            "at least columns [t, y]."
+        )
+
+    expected_shape = first_run.shape
+
+    for run in runs:
+        if run.shape != expected_shape:
+            raise ValueError(
+                "All runs must have the same shape."
+            )
+
+    t = first_run[:, 0]
+
+    y_values = np.stack(
+        [run[:, 1] for run in runs],
+        axis=0,
+    )
+
+    y_average = np.mean(
+        y_values,
+        axis=0,
+    )
+
+    average_run = np.column_stack(
+        (t, y_average)
+    )
+
+    average_df = pd.DataFrame(
+        average_run,
+        columns=["t", "y"],
+    )
+
+    average_df.to_csv(
+        filename,
+        index=False,
+    )
+
+    return average_run
+
 def create_short_test_report(average_metrics):
     lines = [
         ";".join([
             "Neurons",
             "ISE mean",
+            "ISE variance",
             "Final value mean",
             "Maximum overshoot mean",
             "Overshoot mean [%]",
+            "Overshoot variance [%^2]",
             "Settling time mean [s]",
+            "Settling time variance [s^2]",
         ])
     ]
 
@@ -217,10 +309,13 @@ def create_short_test_report(average_metrics):
         lines.append(";".join([
             f"{row['p2']:.0f}",
             f"{row['ise_mean']:.6g}",
+            f"{row['ise_variance']:.6g}",
             f"{row['final_value_mean']:.6f}",
             f"{row['max_overshoot_mean']:.6f}",
             f"{row['overshoot_percent_mean']:.3f}",
+            f"{row['overshoot_percent_variance']:.6g}",
             f"{row['settling_time_mean']:.4f}",
+            f"{row['settling_time_variance']:.6g}",
         ]))
 
     return "\n".join(lines)

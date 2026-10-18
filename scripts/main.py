@@ -8,9 +8,9 @@ import metrics
 def main():
     gc.disable()
 
-    p2_values = list(range(0, 3))
+    p2_values = list(range(0, 1))
     # p2_values = [True, False]
-    repetitions = 10
+    repetitions = 100
     setpoint = 0.5
 
     experiment_data, metrics_df = metrics.run_experiments(

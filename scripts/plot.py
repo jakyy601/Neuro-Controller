@@ -25,7 +25,7 @@ def plot_response(
             t,
             signal,
             color=color,
-            alpha=0.20,
+            alpha=0.10,
             linewidth=1.0,
         )
 
