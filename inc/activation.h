@@ -17,7 +17,7 @@
  * @var activation_fn
  * @brief Function pointer used for activation function and derivative
  */
-typedef float (*activation_fn) (float x);
+typedef double (*activation_fn) (double x);
 
 /**
  * @enum activation_st
@@ -50,7 +50,7 @@ extern const activation_st ACT_LINEAR;
 /**************************************************************************************************
                         Section for public function prototypes
 ***************************************************************************************************/
-float activation_forward(activation_type_en id, float x);
-float activation_backward(activation_type_en id, float x);
+double activation_forward(activation_type_en id, double x);
+double activation_backward(activation_type_en id, double x);
 
 #endif //ACTIVATION_H

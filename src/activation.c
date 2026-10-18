@@ -22,82 +22,82 @@
  * @param x x value
  * @return y value
  */
-static float sigmoid(float x);
+static double sigmoid(double x);
 
 /**
  * @brief Derivative of the sigmoid function
  * @param x x value of the sigmoid function
  * @return y value of the sigmoid function
  */
-static float dSigmoid(float x);
+static double dSigmoid(double x);
 
 /**
  * @brief Derivative of the hyberbolic tangent
  * @param x x value of the dervative of the hyberbolic tangent
  * @return y value of the dervative of the hyberbolic tangent
  */
-static float dTanh(float x);
+static double dTanh(double x);
 
 /**
  * @brief Leaky ReLU function
  * @param x x value of the leaky ReLU function
  * @return y value of the leaky ReLU function
  */
-static float leakyRelu(float x);
+static double leakyRelu(double x);
 
 /**
  * @brief Derivative of the leaky ReLU function
  * @param x x value for the dervative of the leaky ReLU function
  * @return y value for the dervative of the leaky ReLU function
  */
-static float dLeakyRelu(float x);
+static double dLeakyRelu(double x);
 
 /**
  * @brief Linear function
  * @param x x value of the linear function
  * @return y value of the linear function
  */
-static float linear(float x);
+static double linear(double x);
 
 /**
  * @brief Derivative of the linear function
  * @param x x value for the dervative of the linear function (unused but required for consistency)
  * @return y value for the dervative of the linear function
  */
-static float dLinear(float x);
+static double dLinear(double x);
 
 /**************************************************************************************************
                                 Section for static functions
 ***************************************************************************************************/
-static float sigmoid(float x) {
-    return 1 / (1 + expf(-x)); 
+static double sigmoid(double x) {
+    return 1 / (1 + exp(-x)); 
 }
 
-static float dSigmoid(float x) {
-    float s = sigmoid(x);
+static double dSigmoid(double x) {
+    double s = sigmoid(x);
     return s * (1 - s);
 }
 
-static float dTanh(float x) {
-    float th = tanhf(x);
+static double dTanh(double x) {
+    double th = tanh(x);
     return 1.0 - th * th;
 }
 
-static float leakyRelu(float x) {
-    static const float alpha = 0.01;
+static double leakyRelu(double x) {
+    static const double alpha = 0.01;
     return x > 0.0 ? x : alpha * x;
 }
 
-static float dLeakyRelu(float x) {
-    static const float alpha = 0.01;
+static double dLeakyRelu(double x) {
+    static const double alpha = 0.01;
     return x > 0.0 ? 1.0 : alpha;
 }
 
-static float linear(float x) {
+static double linear(double x) {
     return x;
 }
 
-static float dLinear(float x) {
+static double dLinear(double x) {
     /* For consistency only, as the function pointer will still need a parameter -> tell the compiler x is not used */
     (void)x;
     return 1.0;
@@ -117,7 +117,7 @@ const activation_st ACT_SIGMOID = {
 };
 
 const activation_st ACT_TANH = {
-    .forward = tanhf,
+    .forward = tanh,
     .backward = dTanh,
 };
 

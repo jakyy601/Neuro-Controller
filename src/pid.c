@@ -1,12 +1,12 @@
 #include "pid.h"
 
 void PID_Init(PID_Handle_t *pid,
-              float kp,
-              float ki,
-              float kd,
-              float ts,
-              float out_min,
-              float out_max)
+              double kp,
+              double ki,
+              double kd,
+              double ts,
+              double out_min,
+              double out_max)
 {
     pid->kp = kp;
     pid->ki = ki;
@@ -30,14 +30,14 @@ void PID_Reset(PID_Handle_t *pid)
     pid->initialized = 0u;
 }
 
-float PID_Update(PID_Handle_t *pid,
-                 float setpoint,
-                 float measurement)
+double PID_Update(PID_Handle_t *pid,
+                 double setpoint,
+                 double measurement)
 {
-    float error = setpoint - measurement;
+    double error = setpoint - measurement;
 
     /* Derivative on measurement avoids derivative kick on setpoint steps. */
-    float derivative = 0.0f;
+    double derivative = 0.0f;
 
     if (pid->initialized != 0u) {
         derivative = (pid->measurement_prev - measurement) / pid->ts;
@@ -47,17 +47,17 @@ float PID_Update(PID_Handle_t *pid,
     }
 
     /* Tentative integral update. */
-    float integral_new =
+    double integral_new =
         pid->integral + pid->ki * pid->ts * error;
 
     /* Unsaturated PID output. */
-    float output_unsat =
+    double output_unsat =
         pid->kp * error +
         integral_new +
         pid->kd * derivative;
 
     /* Saturate plant/DAC command. */
-    float output_sat = output_unsat;
+    double output_sat = output_unsat;
 
     if (output_sat < pid->out_min) {
         output_sat = pid->out_min;

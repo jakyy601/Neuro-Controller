@@ -1,13 +1,13 @@
 #include "pt2.h"
 
 typedef struct {
-    float y;
-    float dy;
+    double y;
+    double dy;
 } PT2_State_t;
 
 static PT2_State_t PT2_Derivative(const PT2_Handle_t *h,
                                   PT2_State_t x,
-                                  float u)
+                                  double u)
 {
     PT2_State_t dx;
     dx.y = x.dy;
@@ -20,7 +20,7 @@ static PT2_State_t PT2_Derivative(const PT2_Handle_t *h,
     return dx;
 }
 
-void PT2_Init(PT2_Handle_t *h, float Ts)
+void PT2_Init(PT2_Handle_t *h, double Ts)
 {
     h->K  = 1.0f;
     h->T  = 0.5f;
@@ -31,15 +31,15 @@ void PT2_Init(PT2_Handle_t *h, float Ts)
     h->dy = 0.0f;
 }
 
-void PT2_Reset(PT2_Handle_t *h, float y0, float dy0)
+void PT2_Reset(PT2_Handle_t *h, double y0, double dy0)
 {
     h->y  = y0;
     h->dy = dy0;
 }
 
-float PT2_Update(PT2_Handle_t *h, float u)
+double PT2_Update(PT2_Handle_t *h, double u)
 {
-    const float dt = h->Ts;
+    const double dt = h->Ts;
 
     PT2_State_t x = {
         .y  = h->y,
