@@ -36,7 +36,7 @@ static float dSigmoid(float x);
  * @param x x value of the dervative of the hyberbolic tangent
  * @return y value of the dervative of the hyberbolic tangent
  */
-static float dTanh(float x);
+static float dtanhf(float x);
 
 /**
  * @brief Leaky ReLU function
@@ -78,7 +78,7 @@ static float dSigmoid(float x) {
     return s * (1 - s);
 }
 
-static float dTanh(float x) {
+static float dtanhf(float x) {
     float th = tanhf(x);
     return 1.0 - th * th;
 }
@@ -116,9 +116,9 @@ const activation_st ACT_SIGMOID = {
     .backward = dSigmoid,
 };
 
-const activation_st ACT_TANH = {
+const activation_st ACT_tanhf = {
     .forward = tanhf,
-    .backward = dTanh,
+    .backward = dtanhf,
 };
 
 const activation_st ACT_LEAKY_RELU = {

@@ -23,11 +23,11 @@ static PT2_Handle_t pt2;
  * @param
  * @return
  */
-float generateRandomFloat(void);
+float generateRandomfloat(void);
 
-float generateRandomFloatWithLimit(float limit);
+float generateRandomfloatWithLimit(float limit);
 
-float generateXavierFloat(float fanIn, float fanOut);
+float generateXavierfloat(float fanIn, float fanOut);
 
 /**
  * @brief main loop for testing
@@ -56,8 +56,8 @@ int main(int argc, const char* argv[]) {
     ncConfig.neurons = (int)strtol(argv[5], &end, 10);
     ncConfig.output_layer_neurons = (int)strtol(argv[6], &end, 10);
     ncConfig.setpoint = (float)roundf(strtof(argv[7], &end) * 100) / 100;
-    ncConfig.activation_hidden = ACTIVATION_TANH;
-    ncConfig.activation_output = ACTIVATION_TANH;
+    ncConfig.activation_hidden = ACTIVATION_tanhf;
+    ncConfig.activation_output = ACTIVATION_tanhf;
     long int temp = strtol(argv[8], &end, 10);
     ncConfig.isJordan = (_Bool)temp;
 
@@ -75,7 +75,7 @@ int main(int argc, const char* argv[]) {
 
     // function pointer to a function that generates random floats
     float (*randFctPtr)(float, float);
-    randFctPtr = &generateXavierFloat;
+    randFctPtr = &generateXavierfloat;
 
     // Initialize the neuralController
     neuralController_Init(&ncConfig, &control, randFctPtr, &weight, &neuron);
@@ -168,17 +168,17 @@ float round_to_decimal_places(float value, int decimal_places) {
 }
 
 
-float generateRandomFloat(void){
+float generateRandomfloat(void){
     return (rand() / (float)(RAND_MAX)) / 10;
 }
 
-float generateRandomFloatWithLimit(float limit) {
+float generateRandomfloatWithLimit(float limit) {
     float rnd = (float)rand() / (float)RAND_MAX;
     return (2.0f * rnd - 1.0f) * limit;
 }
 
-float generateXavierFloat(float fanIn, float fanOut){
+float generateXavierfloat(float fanIn, float fanOut){
     static float gain = 0.1;
     float limit = gain * sqrtf(6.0f / (fanIn + fanOut));
-    return generateRandomFloatWithLimit(limit);
+    return generateRandomfloatWithLimit(limit);
 }

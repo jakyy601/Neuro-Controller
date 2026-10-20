@@ -253,7 +253,7 @@ void computeSigmas(neuralControllerConfig_st* ncConfig, float* pInput, float ***
     int n = 0; /* Sanity check variable to count neurons during sigma calculation */
 
     /*Backpropagation*/
-    /*For detailed explaination see https://en.wikipedia.org/wiki/Backpropagation
+    /*For detailed expflaination see https://en.wikipedia.org/wiki/Backpropagation
      * next layer     = k = layer + 1
      * current layer  = j = layer
      * previous layer = i = layer - 1
@@ -289,7 +289,7 @@ static void updateWeightsAndBiases(neuralControllerConfig_st* ncConfig, control_
     int w = 0; /* Sanity check variable to count weights during update step */
 
     /*Backpropagation*/
-    /*For detailed explaination see https://en.wikipedia.org/wiki/Backpropagation
+    /*For detailed expflaination see https://en.wikipedia.org/wiki/Backpropagation
      * next layer     = k = layer + 1
      * current layer  = j = layer
      * previous layer = i = layer - 1
@@ -342,7 +342,7 @@ void saveArrayToFile(const char *filename) {
 static const activation_st *get_activation(activation_type_en id) {
     switch (id) {
         case ACTIVATION_SIGMOID:    return &ACT_SIGMOID;
-        case ACTIVATION_TANH:       return &ACT_TANH;
+        case ACTIVATION_tanhf:       return &ACT_tanhf;
         case ACTIVATION_LEAKY_RELU: return &ACT_LEAKY_RELU;
         case ACTIVATION_LINEAR:     return &ACT_LINEAR;
         default:                    return &ACT_LINEAR; // or handle error

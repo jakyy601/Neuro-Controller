@@ -22,7 +22,7 @@ typedef float (*activation_fn) (float x);
 /**
  * @enum activation_st
  * @brief Enumeration for the activation functions used in neuron_st
- * @var tanh Hyperbolic tangent, zero-centered, gradial output from -1 to 1 with diminishing gradient on higher values
+ * @var tanhf Hyperbolic tangent, zero-centered, gradial output from -1 to 1 with diminishing gradient on higher values
  * @var sigmoid Sigmoid function, centerd at 0.5, gradial output from 0 to 1 with diminishing gradient on higher values
  * @var leaky_relu, negative input leads to very small negative output, positive values leads to linear output, very small gradient on negative values
  * @var linear, linear input equals linear output
@@ -34,7 +34,7 @@ typedef struct activation {
 
 typedef enum activation_type{
     ACTIVATION_SIGMOID   = 0,
-    ACTIVATION_TANH      = 1,
+    ACTIVATION_tanhf      = 1,
     ACTIVATION_LEAKY_RELU= 2,
     ACTIVATION_LINEAR    = 3
 } activation_type_en;
@@ -43,7 +43,7 @@ typedef enum activation_type{
                              Section for public instances
 ***************************************************************************************************/
 extern const activation_st ACT_SIGMOID;
-extern const activation_st ACT_TANH;
+extern const activation_st ACT_tanhf;
 extern const activation_st ACT_LEAKY_RELU;
 extern const activation_st ACT_LINEAR;
 
