@@ -17,17 +17,17 @@ pthread_mutex_t mutex;
 static PT2_Handle_t pt2;
 
 /**
- * @brief Generates a random double between 0 and 0.1
+ * @brief Generates a random float between 0 and 0.1
  *
  *
  * @param
  * @return
  */
-double generateRandomdouble(void);
+float generateRandomfloat(void);
 
-double generateRandomdoubleWithLimit(double limit);
+float generateRandomfloatWithLimit(float limit);
 
-double generateXavierdouble(double fanIn, double fanOut);
+float generateXavierfloat(float fanIn, float fanOut);
 
 /**
  * @brief main loop for testing
@@ -40,9 +40,9 @@ double generateXavierdouble(double fanIn, double fanOut);
 int main(int argc, const char* argv[]) {
     // create the neural controller config
     neuralControllerConfig_st ncConfig;
-    double yn = 0;                   // state of plant
-    double output = 0.0;            // neural Network output
-    double *input = NULL;
+    float yn = 0;                   // state of plant
+    float output = 0.0;            // neural Network output
+    float *input = NULL;
 
     // end pointer for strtol
     char* end;
@@ -51,31 +51,31 @@ int main(int argc, const char* argv[]) {
     ncConfig.inputs = (int)strtol(argv[1], &end, 10);
     ncConfig.hidden_layers = (int)strtol(argv[2], &end, 10);
     ncConfig.layers = ncConfig.hidden_layers + 2;
-    ncConfig.learning_rate = (double)roundf(strtof(argv[3], &end) * 100) / 100;
+    ncConfig.learning_rate = (float)roundf(strtof(argv[3], &end) * 100) / 100;
     unsigned int max_epochs = (int)strtol(argv[4], &end, 10);
     ncConfig.neurons = (int)strtol(argv[5], &end, 10);
     ncConfig.output_layer_neurons = (int)strtol(argv[6], &end, 10);
-    ncConfig.setpoint = (double)roundf(strtof(argv[7], &end) * 100) / 100;
-    ncConfig.activation_hidden = ACTIVATION_TANH;
-    ncConfig.activation_output = ACTIVATION_TANH;
+    ncConfig.setpoint = (float)roundf(strtof(argv[7], &end) * 100) / 100;
+    ncConfig.activation_hidden = ACTIVATION_tanhf;
+    ncConfig.activation_output = ACTIVATION_tanhf;
     long int temp = strtol(argv[8], &end, 10);
     ncConfig.isJordan = (_Bool)temp;
 
     printf("Jordan Network: %d\n", ncConfig.isJordan);
 
-    input = (double*)calloc(ncConfig.inputs, sizeof(double));
+    input = (float*)calloc(ncConfig.inputs, sizeof(float));
 
     // Neural Network
-    double ***weight = NULL;
+    float ***weight = NULL;
     neuron_st **neuron = NULL; 
     control_st control = {0};
 
     // set seed for rand() function
     srand(time(NULL));
 
-    // function pointer to a function that generates random doubles
-    double (*randFctPtr)(double, double);
-    randFctPtr = &generateXavierdouble;
+    // function pointer to a function that generates random floats
+    float (*randFctPtr)(float, float);
+    randFctPtr = &generateXavierfloat;
 
     // Initialize the neuralController
     neuralController_Init(&ncConfig, &control, randFctPtr, &weight, &neuron);
@@ -111,7 +111,7 @@ int main(int argc, const char* argv[]) {
 
     // Create PNG file and free allocations
     size_t length;
-    double* pngData = ConvertToPNG(&length, imageRef->image);
+    float* pngData = ConvertToPNG(&length, imageRef->image);
     WriteToFile(pngData, length, "control.png");
     DeleteImage(imageRef->image);
     FreeAllocations();
@@ -155,30 +155,30 @@ int main(int argc, const char* argv[]) {
  * @param u control variable
  * @return next state
  */
-double i_plant(double yn, double u) {
-    double K = 1;
-    double T = 0.1;
+float i_plant(float yn, float u) {
+    float K = 1;
+    float T = 0.1;
 
     return yn + K * u * T;
 }
 
-double round_to_decimal_places(double value, int decimal_places) {
-    double factor = pow(10, decimal_places);
+float round_to_decimal_places(float value, int decimal_places) {
+    float factor = powf(10, decimal_places);
     return round(value * factor) / factor;
 }
 
 
-double generateRandomdouble(void){
-    return (rand() / (double)(RAND_MAX)) / 10;
+float generateRandomfloat(void){
+    return (rand() / (float)(RAND_MAX)) / 10;
 }
 
-double generateRandomdoubleWithLimit(double limit) {
-    double rnd = (double)rand() / (double)RAND_MAX;
+float generateRandomfloatWithLimit(float limit) {
+    float rnd = (float)rand() / (float)RAND_MAX;
     return (2.0f * rnd - 1.0f) * limit;
 }
 
-double generateXavierdouble(double fanIn, double fanOut){
-    static double gain = 0.1;
-    double limit = gain * sqrtf(6.0f / (fanIn + fanOut));
-    return generateRandomdoubleWithLimit(limit);
+float generateXavierfloat(float fanIn, float fanOut){
+    static float gain = 0.1;
+    float limit = gain * sqrtf(6.0f / (fanIn + fanOut));
+    return generateRandomfloatWithLimit(limit);
 }

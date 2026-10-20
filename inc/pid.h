@@ -2,32 +2,32 @@
 #define PID_H
 
 typedef struct PID_Handle {
-    double kp;
-    double ki;
-    double kd;
-    double ts;
+    float kp;
+    float ki;
+    float kd;
+    float ts;
 
-    double out_min;
-    double out_max;
+    float out_min;
+    float out_max;
 
-    double integral;
-    double measurement_prev;
-    double output_prev;
+    float integral;
+    float measurement_prev;
+    float output_prev;
 
     unsigned int initialized;
 } PID_Handle_t;
 
 void PID_Init(PID_Handle_t *pid,
-              double kp,
-              double ki,
-              double kd,
-              double ts,
-              double out_min,
-              double out_max);
+              float kp,
+              float ki,
+              float kd,
+              float ts,
+              float out_min,
+              float out_max);
 
-double PID_Update(PID_Handle_t *pid,
-                 double setpoint,
-                 double measurement);
+float PID_Update(PID_Handle_t *pid,
+                 float setpoint,
+                 float measurement);
 
 void PID_Reset(PID_Handle_t *pid);
 

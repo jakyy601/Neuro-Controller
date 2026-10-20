@@ -2,17 +2,17 @@
 #define PT2_H
 
 typedef struct PT2_Handle {
-    double K;      // Static gain
-    double T;      // Time constant [s]
-    double D;      // Damping ratio
-    double Ts;     // Simulation/control sampling time [s]
+    float K;      // Static gain
+    float T;      // Time constant [s]
+    float D;      // Damping ratio
+    float Ts;     // Simulation/control sampling time [s]
 
-    double y;      // Plant output
-    double dy;     // First derivative of y
+    float y;      // Plant output
+    float dy;     // First derivative of y
 } PT2_Handle_t;
 
-void PT2_Init(PT2_Handle_t *h, double Ts);
-void PT2_Reset(PT2_Handle_t *h, double y0, double dy0);
-double PT2_Update(PT2_Handle_t *h, double u);
+void PT2_Init(PT2_Handle_t *h, float Ts);
+void PT2_Reset(PT2_Handle_t *h, float y0, float dy0);
+float PT2_Update(PT2_Handle_t *h, float u);
 
 #endif /* PT2_H */

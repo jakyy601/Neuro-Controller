@@ -34,10 +34,10 @@
  * @var sigma Error signal needed for backpropagation
  */
 typedef struct neuron {
-    double netinput;
-    double netoutput;
-    double bias;
-    double sigma;
+    float netinput;
+    float netoutput;
+    float bias;
+    float sigma;
 } neuron_st;
 
 /**
@@ -86,8 +86,8 @@ typedef struct neuralControllerConfig {
     int output_layer_neurons;
     int inputs;
     int initialized;
-    double learning_rate;
-    double setpoint;
+    float learning_rate;
+    float setpoint;
     _Bool isJordan;
     activation_type_en activation_hidden;
     activation_type_en activation_output;
@@ -105,11 +105,11 @@ typedef struct neuralControllerConfig {
  * @var epoch                   Current epoch
  */
 typedef struct control {
-    double act_old;
-    double act_new;
-    double rating;
-    double *input;
-    double *input_old;
+    float act_old;
+    float act_new;
+    float rating;
+    float *input;
+    float *input_old;
     unsigned int epoch;
 } control_st;
 
@@ -120,7 +120,7 @@ typedef struct control {
  * @var available               Is the input available
  */
 typedef struct input {
-    double value;
+    float value;
     _Bool available;
 } input_st;
 
@@ -141,7 +141,7 @@ typedef struct input {
  * @param pneuron Reference pointer to a 2-dimensional neuron_st array
  * @return 0 on success
  */
-int neuralController_Init(neuralControllerConfig_st* ncConfig, control_st *control, double (*fctPtr)(double, double), double**** pWeight, neuron_st*** pNeuron);
+int neuralController_Init(neuralControllerConfig_st* ncConfig, control_st *control, float (*fctPtr)(float, float), float**** pWeight, neuron_st*** pNeuron);
 
 /**
  * @brief Iterates once through the forward and backwards pass.
@@ -155,7 +155,7 @@ int neuralController_Init(neuralControllerConfig_st* ncConfig, control_st *contr
  * @param neuron Pointer to a 2-dimensional neuron_st array
  * @return 0 on success
  */
-int neuralController_Run(neuralControllerConfig_st* ncConfig, control_st *control, double* pOutput, double* pInput, double*** weight, neuron_st** neuron);
+int neuralController_Run(neuralControllerConfig_st* ncConfig, control_st *control, float* pOutput, float* pInput, float*** weight, neuron_st** neuron);
 
 /**
  * @brief Frees the allocated memory used for the neural controller.
@@ -165,7 +165,7 @@ int neuralController_Run(neuralControllerConfig_st* ncConfig, control_st *contro
  * @param weight Pointer to a 3-dimensional weights array
  * @param neuron Pointer to a 2-dimensional neuron_st array
  */
-void neuralController_Free(neuralControllerConfig_st* ncConfig, control_st *control, double ***weight, neuron_st **neuron);
+void neuralController_Free(neuralControllerConfig_st* ncConfig, control_st *control, float ***weight, neuron_st **neuron);
 
 /**
  * @brief Currently unused. Please don't use
@@ -176,6 +176,6 @@ void saveArrayToFile(const char *filename);
  * @brief 
  * 
  */
-double stepDecayLr(int epoch, double initialLr, int stepSize, double gamma);
+float stepDecayLr(int epoch, float initialLr, int stepSize, float gamma);
 
 #endif  /* neuralController */

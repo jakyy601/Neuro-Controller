@@ -2,9 +2,9 @@
   "version": 2,
   "configurePresets": [
     {
-      "name": "normal",
+      "name": "shared",
       "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build/normal"
+      "binaryDir": "${sourceDir}/build/shared"
     },
     {
       "name": "test",
@@ -18,8 +18,8 @@
   ],
   "buildPresets": [
     {
-      "name": "normal",
-      "configurePreset": "normal"
+      "name": "shared",
+      "configurePreset": "shared"
     },
     {
       "name": "test",

@@ -12,13 +12,13 @@
 #define WriteToFile false
 
 typedef struct i2 {
-    double yn;
-    double yn2;
+    float yn;
+    float yn2;
 } i2_st;
 
-double generateRandomInt(void);
-double i_plant(double yn, double u);
-double round_to_decimal_places(double value, int decimal_places);
+float generateRandomInt(void);
+float i_plant(float yn, float u);
+float round_to_decimal_places(float value, int decimal_places);
 
 static const char inifile[] = "F:/work/Neuro-Controller/cfg/config.ini";
 

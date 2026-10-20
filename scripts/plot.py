@@ -13,12 +13,10 @@ def plot_response(
     Plot all individual runs in the background and their average
     in the foreground.
     """
-
     t = runs[0][:, 0]
     signal_all = np.asarray(
         [run[:, signal_column] for run in runs]
     )
-
     # Individual runs
     for signal in signal_all:
         ax.plot(
@@ -28,10 +26,8 @@ def plot_response(
             alpha=0.10,
             linewidth=1.0,
         )
-
     # Average run
     signal_average = signal_all.mean(axis=0)
-
     ax.plot(
         t,
         signal_average,
@@ -40,7 +36,6 @@ def plot_response(
         label=f"p2 = {p2}",
         zorder=10,
     )
-
     return t, signal_all, signal_average
 
 def configure_plot(ax, title, y_label):
@@ -59,7 +54,6 @@ def plot_all_experiments(experiment_data):
 
     fig_y, ax_y = plt.subplots(figsize=(10, 6))
     fig_u, ax_u = plt.subplots(figsize=(10, 6))
-
     for experiment in experiment_data:
         plot_response(
             ax=ax_y,
@@ -69,7 +63,6 @@ def plot_all_experiments(experiment_data):
             signal_column=1,
             signal_name="y(t)",
         )
-
         plot_response(
             ax=ax_u,
             runs=experiment["runs"],
@@ -78,20 +71,16 @@ def plot_all_experiments(experiment_data):
             signal_column=2,
             signal_name="u(t)",
         )
-
     configure_plot(
         ax_y,
         title="Plant output for different p2 values",
         y_label="y(t)",
     )
-
     configure_plot(
         ax_u,
         title="Controller output for different p2 values",
         y_label="u(t)",
     )
-
     fig_y.tight_layout()
     fig_u.tight_layout()
-
     return fig_y, fig_u
