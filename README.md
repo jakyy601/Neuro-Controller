@@ -24,7 +24,7 @@ Using CMake either a full executable using the src/main.c can be built, a shared
 target that can be consumed by another exectuable.
 Consume with 
 ```
-target_link_library(myTarget
+target_link_libraries(myTarget
     PUBLIC
         neuralController
 )
