@@ -2,6 +2,7 @@
 Implementation of a feed forward neural network with online learning through backpropagation and online learning that controls a simulated PTn plant. 
 
 ## Folder structure
+```text
 ├── build                       CMake's build folder, configured through CMakePreset.json
 ├── doc                         Several .tex and .puml files that were used in the corresponding Master Thesis        
 ├── inc                         Include directory
@@ -15,6 +16,7 @@ Implementation of a feed forward neural network with online learning through bac
 ├── CMakeLists.txt              Declaration of targets
 ├── CMakePreset.json            Declaration of CMake presets
 ├── README.md                   This file
+```
 
 ## Neural Network
 The network code is found in src/neuralController.c and the corresponding header file neuralController.h
