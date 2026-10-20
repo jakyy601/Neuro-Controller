@@ -34,7 +34,7 @@ typedef struct activation {
 
 typedef enum activation_type{
     ACTIVATION_SIGMOID   = 0,
-    ACTIVATION_tanhf      = 1,
+    ACTIVATION_TANH      = 1,
     ACTIVATION_LEAKY_RELU= 2,
     ACTIVATION_LINEAR    = 3
 } activation_type_en;

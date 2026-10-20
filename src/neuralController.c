@@ -342,7 +342,7 @@ void saveArrayToFile(const char *filename) {
 static const activation_st *get_activation(activation_type_en id) {
     switch (id) {
         case ACTIVATION_SIGMOID:    return &ACT_SIGMOID;
-        case ACTIVATION_tanhf:       return &ACT_tanhf;
+        case ACTIVATION_TANH:       return &ACT_tanhf;
         case ACTIVATION_LEAKY_RELU: return &ACT_LEAKY_RELU;
         case ACTIVATION_LINEAR:     return &ACT_LINEAR;
         default:                    return &ACT_LINEAR; // or handle error
